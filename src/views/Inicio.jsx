@@ -3,8 +3,7 @@ import Contador from "../components/Contador";
 const Inicio = () => {
     return (
     <>
-        <Contador  />
-
+        <h2>Pagina de inicio</h2>
     </>
     );
 }

@@ -48,15 +48,15 @@ const Encabezado = () => {
 
                                 className={mostrarMenu ? "texto-marca" : "text-white"}
                                 onClick={() => manejarNavegacion("/inicio")}
-                                >
+                            >
                                 {mostrarMenu ? <i className="bi-house-fill me-2"></i> : null} Inicio
 
                             </Nav.Link>
 
                             <Nav.Link
                                 className={mostrarMenu ? "texto-marca" : "text-white"}
-                                onClick={() => manejarNavegacion("/categorias")} 
-                                >
+                                onClick={() => manejarNavegacion("/categorias")}
+                            >
                                 {mostrarMenu ? <i className="bi-house-fill me-2"></i> : null} Categorias
 
                             </Nav.Link>
@@ -64,7 +64,7 @@ const Encabezado = () => {
                             <Nav.Link
                                 className={mostrarMenu ? "texto-marca" : "text-white"}
                                 onClick={() => manejarNavegacion("/productos")}
-                                >
+                            >
                                 {mostrarMenu ? <i className="bi-house-fill me-2"></i> : null} Productos
 
                             </Nav.Link>
@@ -72,7 +72,7 @@ const Encabezado = () => {
                             <Nav.Link
                                 className={mostrarMenu ? "texto-marca" : "text-white"}
                                 onClick={() => manejarNavegacion("/catalogo")}
-                                >
+                            >
                                 {mostrarMenu ? <i className="bi-house-fill me-2"></i> : null} Catalogo
 
                             </Nav.Link>
@@ -80,7 +80,7 @@ const Encabezado = () => {
                             <Nav.Link
                                 className={mostrarMenu ? "texto-marca" : "text-white"}
                                 onClick={() => manejarNavegacion("/clientes")}
-                                >
+                            >
                                 {mostrarMenu ? <i className="bi-house-fill me-2"></i> : null} Clientes
 
                             </Nav.Link>
@@ -88,29 +88,29 @@ const Encabezado = () => {
                             <Nav.Link
                                 className={mostrarMenu ? "texto-marca" : "text-white"}
                                 onClick={() => manejarNavegacion("/empleados")}
-                                >
+                            >
                                 {mostrarMenu ? <i className="bi-house-fill me-2"></i> : null} Empleados
 
                             </Nav.Link>
 
                             <Nav.Link
                                 className={mostrarMenu ? "texto-marca" : "text-white"}
-                                onClick={() => manejarNavegacion("/login")} > 
+                                onClick={() => manejarNavegacion("/login")} >
                                 {mostrarMenu ? <i className="bi-house-fill me-2"></i> : null} Login
 
                             </Nav.Link>
 
                             <Nav.Link
-                                className={mostrarMenu ? "texto-marca" : "text-white"} 
+                                className={mostrarMenu ? "texto-marca" : "text-white"}
                                 onClick={() => manejarNavegacion("/usuarios")}
-                                >
+                            >
                                 {mostrarMenu ? <i className="bi-house-fill me-2"></i> : null} Usuarios
                             </Nav.Link>
 
                             <Nav.Link
                                 className={mostrarMenu ? "texto-marca" : "text-white"}
                                 onClick={() => manejarNavegacion("/ventas")}
-                                >
+                            >
                                 {mostrarMenu ? <i className="bi-house-fill me-2"></i> : null} Ventas
                             </Nav.Link>
 
