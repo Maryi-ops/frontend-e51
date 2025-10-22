@@ -1,21 +1,21 @@
 import { useState, useEffect } from "react";
 import { Container } from "react-bootstrap";
-import TablaProductos from "../components/productos/TablaProductos";
+import TablaCompras from "../components/compras/TablaCompras";
 
-const Productos = () => {
-    const [productos, setProductos] = useState([]);
+const Compras = () => {
+    const [compras, setCompras] = useState([]);
     const [cargando, setCargando] = useState(true);
 
-    const obtenerProductos = async () => {
+    const obtenerCompras = async () => {
         try {
-            const respuesta = await fetch("http://localhost:3000/api/productos");
+            const respuesta = await fetch("http://localhost:3000/api/compras");
             if (!respuesta.ok) {
-                throw new Error("Error al obtener los Productos");
+                throw new Error("Error al obtener las Compras");
             }
 
             const datos = await respuesta.json();
 
-            setProductos(datos);
+            setCompras(datos);
             setCargando(false);
 
         } catch (error) {
@@ -25,17 +25,17 @@ const Productos = () => {
     };
 
     useEffect(() => {
-        obtenerProductos();
+        obtenerCompras();
     }, []);
 
     return (
         <>
             <Container className="mt-4">
 
-                <h4>Productos</h4>
+                <h4>Compras</h4>
 
-                <TablaProductos
-                    productos={productos}
+                <TablaCompras
+                    compras={compras}
                     cargando={cargando}
                 />
 
@@ -44,4 +44,4 @@ const Productos = () => {
     );
 }
 
-export default Productos;
+export default Compras;

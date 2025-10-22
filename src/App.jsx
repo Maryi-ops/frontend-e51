@@ -9,6 +9,7 @@ import Encabezado from "./components/navegacion/Encabezado";
 //Importar las vistas.
 import Login from "./views/Login";
 import Inicio from "./views/Inicio";
+import Compras from "./views/Compras";
 import Categorias from "./views/Categorias";
 import Productos from "./views/Productos";
 import Catalogo from "./views/Catalogo";
@@ -30,6 +31,7 @@ const App = () =>{
           <Route path="/empleados" element={< Empleados />} />
           <Route path="/usuarios" element={<Usuarios />} />
           <Route path="/ventas" element={<Ventas />} />
+          <Route path="/compras" element={<Compras />} />
           <Route path="/categorias" element={<Categorias />} />
           <Route path="/productos" element={<Productos />} />
           <Route path="/catalogo" element={<Catalogo />} />
