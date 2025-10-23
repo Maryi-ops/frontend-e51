@@ -17,7 +17,7 @@ const Encabezado = () => {
     };
 
     return (
-        <Navbar expand="md" fixed="top" className="bg-primary">
+        <Navbar expand="md" fixed="top" className="vivaelnegro">
             <Container>
                 <Navbar.Brand
                     onClick={() => manejarNavegacion("/inicio")}

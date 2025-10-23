@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Row, Col, Button } from "react-bootstrap";
 import TablaEmpleados from "../components/empleados/TablaEmpleados";
+import CuadroBusquedas from "../components/Busquedas/CuadroBusquedas";
 
 const Empleados = () => {
     const [empleados, setEmpleados] = useState([]);
     const [cargando, setCargando] = useState(true);
+
+    const [empleadosFiltrados, setEmpleadosFiltrados] = useState([]);
+    const [textoBusqueda, setTextoBusqueda] = useState("");
+
 
     const obtenerEmpleados = async () => {
         try {
@@ -16,12 +21,30 @@ const Empleados = () => {
             const datos = await respuesta.json();
 
             setEmpleados(datos);
+            setEmpleadosFiltrados(datos);
             setCargando(false);
 
         } catch (error) {
             console.log(error.message);
             setCargando(false);
         }
+    };
+
+    const manejarCambioBusqueda = (e) => {
+        const texto = e.target.value.toLowerCase();
+        setTextoBusqueda(texto);
+        const filtradas = empleados.filter(
+            (empleado) =>
+                empleado.primer_nombre.toLowerCase().includes(texto) ||
+                empleado.segundo_nombre.toLowerCase().includes(texto) ||
+                empleado.primer_apellido.toLowerCase().includes(texto) ||
+                empleado.segundo_apellido.toLowerCase().includes(texto) ||
+                empleado.segundo_apellido.toLowerCase().includes(texto) ||
+                empleado.cedula.toLowerCase().includes(texto) ||
+                empleado.cargo.toLowerCase().includes(texto) ||
+                empleado.fecha_contratacion.toLowerCase().includes(texto)
+        );
+        setEmpleadosFiltrados(filtradas);
     };
 
     useEffect(() => {
@@ -34,8 +57,18 @@ const Empleados = () => {
 
                 <h4>Empleados</h4>
 
+                <Row>
+                    <Col lg={5} md={8} sm={8} xs={7}>
+                        <CuadroBusquedas
+                            textoBusqueda={textoBusqueda}
+                            manejarCambioBusqueda={manejarCambioBusqueda}
+                        />
+                    </Col>
+                </Row>
+
+
                 <TablaEmpleados
-                    empleados={empleados}
+                    empleados={empleadosFiltrados}
                     cargando={cargando}
                 />
 
