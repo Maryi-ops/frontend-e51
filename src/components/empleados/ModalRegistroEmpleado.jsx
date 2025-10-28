@@ -1,11 +1,11 @@
 import { Modal, Form, Button } from "react-bootstrap";
 
-const ModalRegistroCliente = ({
+const ModalRegistroEmpleado = ({
   mostrarModal,
   setMostrarModal,
-  nuevoCliente,
+  nuevoEmpleado,
   manejarCambioInput,
-  agregarCliente,
+  agregarEmpleado,
 }) => {
   return (
     <Modal show={mostrarModal} onHide={() => setMostrarModal(false)} centered>
