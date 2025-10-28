@@ -4,5 +4,15 @@
 }
 
 .vivaelnegro {
-    background-color: rgb(0, 0, 0);
+    background-color: rgb(102, 27, 98);
+}
+
+.color_boton_registrar  {
+    background-color: rgb(102, 27, 98);
+    border-color: rgba(255, 0, 0, 0);
+}   
+
+.color_boton_registrar:hover {
+    background-color:  rgba(95, 11, 91, 0.425);
+    border-color: rgba(255, 0, 0, 0);
 }
