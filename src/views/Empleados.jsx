@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import TablaEmpleados from "../components/empleados/TablaEmpleados";
 import CuadroBusquedas from "../components/Busquedas/CuadroBusquedas";
-import ModalRegistroEmpleado from "../components/empleados/ModalRegistroEmpleado";
+import ModalRegistroEmpleado from "../components/empleados/ModalRegistroEmpleado.jsx";
 
 const Empleados = () => {
     const [empleados, setEmpleados] = useState([]);
@@ -18,8 +18,8 @@ const Empleados = () => {
         primer_apellido: "",
         segundo_apellido: "",
         celular: "",
-        direccion: "",
-        cedula: ""
+        cargo: "",
+        fecha_contratacion: ""
     });
 
     const manejarCambioInput = (e) => {
@@ -130,7 +130,7 @@ const Empleados = () => {
                     cargando={cargando}
                 />
 
-                <ModalRegistroCategoria
+                <ModalRegistroEmpleado
                     mostrarModal={mostrarModal}
                     setMostrarModal={setMostrarModal}
                     nuevaEmpleado={nuevaEmpleado}

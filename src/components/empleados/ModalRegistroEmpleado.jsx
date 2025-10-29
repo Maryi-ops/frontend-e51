@@ -10,7 +10,7 @@ const ModalRegistroEmpleado = ({
   return (
     <Modal show={mostrarModal} onHide={() => setMostrarModal(false)} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Agregar Nuevo Cliente</Modal.Title>
+        <Modal.Title>Agregar Nuevo Empleado</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
@@ -19,9 +19,9 @@ const ModalRegistroEmpleado = ({
             <Form.Control
               type="text"
               name="primer_nombre"
-              value={nuevoCliente.primer_nombre}
+              value={nuevoEmpleado.primer_nombre}
               onChange={manejarCambioInput}
-              placeholder="Ej: Manuel"
+              placeholder="Ej: Luis"
               maxLength={20}
               required
             />
@@ -32,7 +32,7 @@ const ModalRegistroEmpleado = ({
             <Form.Control
               type="text"
               name="segundo_nombre"
-              value={nuevoCliente.segundo_nombre}
+              value={nuevoEmpleado.segundo_nombre}
               onChange={manejarCambioInput}
               placeholder="Ej: Jose"
               maxLength={20}
@@ -45,7 +45,7 @@ const ModalRegistroEmpleado = ({
             <Form.Control
               type="text"
               name="primer_apellido"
-              value={nuevoCliente.primer_apellido}
+              value={nuevoEmpleado.primer_apellido}
               onChange={manejarCambioInput}
               placeholder="Ej: Gomez"
               maxLength={20}
@@ -58,7 +58,7 @@ const ModalRegistroEmpleado = ({
             <Form.Control
               type="text"
               name="segundo_apellido"
-              value={nuevoCliente.segundo_apellido}
+              value={nuevoEmpleado.segundo_apellido}
               onChange={manejarCambioInput}
               placeholder="Ej: Garcia"
               maxLength={20}
@@ -71,7 +71,7 @@ const ModalRegistroEmpleado = ({
             <Form.Control
               type="text"
               name="celular"
-              value={nuevoCliente.celular}
+              value={nuevoEmpleado.celular}
               onChange={manejarCambioInput}
               placeholder="Ej: 86589525"
               maxLength={8}
@@ -80,32 +80,31 @@ const ModalRegistroEmpleado = ({
           </Form.Group>
 
           
-          <Form.Group className="mb-3" controlId="direccion">
-            <Form.Label> Direccion </Form.Label>
+          <Form.Group className="mb-3" controlId="cargo">
+            <Form.Label> Cargo </Form.Label>
             <Form.Control
               type="text"
-              name="direccion"
-              value={nuevoCliente.direccion}
+              name="cargo"
+              value={nuevoEmpleado.cargo}
               onChange={manejarCambioInput}
-              placeholder="Ej: van centro 2 cuadras al oeste"
+              placeholder="Ej: Mantenimiento"
               maxLength={150}
               required
             />
           </Form.Group>
 
 
-          <Form.Group className="mb-3" controlId="cedula">
-            <Form.Label> Cedula </Form.Label>
+          <Form.Group className="mb-3" controlId="fecha_contratacion">
+            <Form.Label> Fecha de Contratación </Form.Label>
             <Form.Control
-              type="text"
-              name="cedula"
-              value={nuevoCliente.cedula}
+              type="date"
+              name="fecha_contratacion"
+              value={nuevoEmpleado.fecha_contratacion}
               onChange={manejarCambioInput}
-              placeholder="Ej: 1210346C100"
-              maxLength={14}
               required
             />
           </Form.Group>
+
 
         </Form>
       </Modal.Body>
@@ -115,14 +114,14 @@ const ModalRegistroEmpleado = ({
         </Button>
         <Button
           variant="primary"
-          onClick={agregarCliente}
-          disabled={!nuevoCliente.nombre_cliente.trim()}
+          onClick={agregarEmpleado}
+          disabled={!nuevoEmpleado.primer_nombre.trim()}
         >
-          Guardar Cliente
+          Guardar Empleado
         </Button>
       </Modal.Footer>
     </Modal>
   );
 };
 
-export default ModalRegistroCliente;
+export default ModalRegistroEmpleado;
