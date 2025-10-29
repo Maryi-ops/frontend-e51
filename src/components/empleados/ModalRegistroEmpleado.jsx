@@ -3,7 +3,15 @@ import { Modal, Form, Button } from "react-bootstrap";
 const ModalRegistroEmpleado = ({
   mostrarModal,
   setMostrarModal,
-  nuevoEmpleado,
+  nuevoEmpleado = {
+    primer_nombre: "",
+    segundo_nombre: "",
+    primer_apellido: "",
+    segundo_apellido: "",
+    celular: "",
+    cargo: "",
+    fecha_contratacion: "",
+  },
   manejarCambioInput,
   agregarEmpleado,
 }) => {

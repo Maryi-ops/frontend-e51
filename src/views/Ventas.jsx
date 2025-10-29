@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import TablaVentas from "../components/ventas/TablaVentas";
 import CuadroBusquedas from "../components/Busquedas/CuadroBusquedas";
 
@@ -10,8 +10,8 @@ const Ventas = () => {
     const [ventasFiltradas, setVentasFiltradas] = useState([]);
     const [textoBusqueda, setTextoBusqueda] = useState("");
 
-
     const obtenerVentas = async () => {
+        setCargando(true);
         try {
             const respuesta = await fetch("http://localhost:3000/api/ventas");
             if (!respuesta.ok) {
@@ -20,39 +20,45 @@ const Ventas = () => {
 
             const datos = await respuesta.json();
 
-            setVentas(datos);
-            setVentasFiltradas(datos);
-            setCargando(false);
-
+            setVentas(datos || []);
+            setVentasFiltradas(datos || []);
         } catch (error) {
             console.log(error.message);
+            setVentas([]);
+            setVentasFiltradas([]);
+        } finally {
             setCargando(false);
         }
     };
 
     const manejarCambioBusqueda = (e) => {
-        const texto = e.target.value.toLowerCase();
+        const texto = String(e.target?.value ?? "").toLowerCase();
         setTextoBusqueda(texto);
-        const filtradas = ventas.filter(
-            (venta) =>
-                venta.id_venta.toLowerCase().includes(texto) ||
-                venta.id_cliente.toLowerCase().includes(texto) ||
-                venta.id_empleado.toLowerCase().includes(texto) ||
-                venta.fecha_venta.toLowerCase().includes(texto) ||
-                venta.total_venta.toLowerCase().includes(texto)
-        );
+        const filtradas = (ventas || []).filter((venta) => {
+            const idVenta = String(venta?.id_venta ?? "").toLowerCase();
+            const idCliente = String(venta?.id_cliente ?? "").toLowerCase();
+            const idEmpleado = String(venta?.id_empleado ?? "").toLowerCase();
+            const fecha = String(venta?.fecha_venta ?? "").toLowerCase();
+            const total = String(venta?.total_venta ?? "").toLowerCase();
+            return (
+                idVenta.includes(texto) ||
+                idCliente.includes(texto) ||
+                idEmpleado.includes(texto) ||
+                fecha.includes(texto) ||
+                total.includes(texto)
+            );
+        });
         setVentasFiltradas(filtradas);
     };
 
-
     useEffect(() => {
         obtenerVentas();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
         <>
             <Container className="mt-4">
-
                 <h4>Ventas</h4>
 
                 <Row>
@@ -64,15 +70,13 @@ const Ventas = () => {
                     </Col>
                 </Row>
 
-
-                <TablaCategorias
+                <TablaVentas
                     ventas={ventasFiltradas}
                     cargando={cargando}
                 />
-
             </Container>
         </>
     );
-}
+};
 
 export default Ventas;

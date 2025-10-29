@@ -1,9 +1,18 @@
+
 import { Modal, Form, Button } from "react-bootstrap";
 
 const ModalRegistroCliente = ({
   mostrarModal,
   setMostrarModal,
-  nuevoCliente,
+  nuevoCliente = {
+    primer_nombre: "",
+    segundo_nombre: "",
+    primer_apellido: "",
+    segundo_apellido: "",
+    celular: "",
+    direccion: "",
+    cedula: "",
+  },
   manejarCambioInput,
   agregarCliente,
 }) => {
@@ -79,7 +88,6 @@ const ModalRegistroCliente = ({
             />
           </Form.Group>
 
-          
           <Form.Group className="mb-3" controlId="direccion">
             <Form.Label> Direccion </Form.Label>
             <Form.Control
@@ -93,7 +101,6 @@ const ModalRegistroCliente = ({
             />
           </Form.Group>
 
-
           <Form.Group className="mb-3" controlId="cedula">
             <Form.Label> Cedula </Form.Label>
             <Form.Control
@@ -106,7 +113,6 @@ const ModalRegistroCliente = ({
               required
             />
           </Form.Group>
-
         </Form>
       </Modal.Body>
       <Modal.Footer>
@@ -116,7 +122,7 @@ const ModalRegistroCliente = ({
         <Button
           variant="primary"
           onClick={agregarCliente}
-          disabled={!nuevoCliente.nombre_cliente.trim()}
+          disabled={!nuevoCliente.primer_nombre.trim()}
         >
           Guardar Cliente
         </Button>

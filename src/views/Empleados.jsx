@@ -12,7 +12,7 @@ const Empleados = () => {
     const [textoBusqueda, setTextoBusqueda] = useState("");
 
     const [mostrarModal, setMostrarModal] = useState(false);
-    const [nuevaEmpleado, setNuevaEmpleado] = useState({
+    const [nuevoEmpleado, setNuevoEmpleado] = useState({
         primer_nombre: '',
         segundo_nombre: '',
         primer_apellido: "",
@@ -24,24 +24,24 @@ const Empleados = () => {
 
     const manejarCambioInput = (e) => {
         const { name, value } = e.target;
-        setNuevaEmpleado(prev => ({ ...prev, [name]: value }));
+        setNuevoEmpleado(prev => ({ ...prev, [name]: value }));
     };
 
 
     const agregarEmpleado = async () => {
-        if (!nuevaEmpleado.primer_nombre.trim()) return;
+        if (!String(nuevoEmpleado.primer_nombre ?? "").trim()) return;
 
         try {
             const respuesta = await fetch('http://localhost:3000/api/registrarempleado', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(nuevaEmpleado)
+                body: JSON.stringify(nuevoEmpleado)
             });
 
             if (!respuesta.ok) throw new Error('Error al guardar');
 
             // Limpiar y cerrar
-            setNuevaEmpleado({
+            setNuevoEmpleado({
                 primer_nombre: '',
                 segundo_nombre: '',
                 primer_apellido: '',
@@ -61,6 +61,7 @@ const Empleados = () => {
 
 
     const obtenerEmpleados = async () => {
+        setCargando(true);
         try {
             const respuesta = await fetch("http://localhost:3000/api/empleados");
             if (!respuesta.ok) {
@@ -69,34 +70,45 @@ const Empleados = () => {
 
             const datos = await respuesta.json();
 
-            setEmpleados(datos);
-            setEmpleadosFiltrados(datos);
-            setCargando(false);
-
+            setEmpleados(datos || []);
+            setEmpleadosFiltrados(datos || []);
         } catch (error) {
             console.log(error.message);
+            setEmpleados([]);
+            setEmpleadosFiltrados([]);
+        } finally {
             setCargando(false);
         }
     };
 
     const manejarCambioBusqueda = (e) => {
-        const texto = e.target.value.toLowerCase();
+        const texto = String(e.target?.value ?? "").toLowerCase();
         setTextoBusqueda(texto);
-        const filtradas = empleados.filter(
-            (empleado) =>
-                empleado.primer_nombre.toLowerCase().includes(texto) ||
-                empleado.segundo_nombre.toLowerCase().includes(texto) ||
-                empleado.primer_apellido.toLowerCase().includes(texto) ||
-                empleado.segundo_apellido.toLowerCase().includes(texto) ||
-                empleado.cedula.toLowerCase().includes(texto) ||
-                empleado.cargo.toLowerCase().includes(texto) ||
-                empleado.fecha_contratacion.toLowerCase().includes(texto)
-        );
+        const filtradas = (empleados || []).filter((empleado) => {
+            const primer = String(empleado?.primer_nombre ?? "").toLowerCase();
+            const segundo = String(empleado?.segundo_nombre ?? "").toLowerCase();
+            const pApellido = String(empleado?.primer_apellido ?? "").toLowerCase();
+            const sApellido = String(empleado?.segundo_apellido ?? "").toLowerCase();
+            const celular = String(empleado?.celular ?? "").toLowerCase();
+            const cargo = String(empleado?.cargo ?? "").toLowerCase();
+            const fecha = String(empleado?.fecha_contratacion ?? "").toLowerCase();
+
+            return (
+                primer.includes(texto) ||
+                segundo.includes(texto) ||
+                pApellido.includes(texto) ||
+                sApellido.includes(texto) ||
+                celular.includes(texto) ||
+                cargo.includes(texto) ||
+                fecha.includes(texto)
+            );
+        });
         setEmpleadosFiltrados(filtradas);
     };
 
     useEffect(() => {
         obtenerEmpleados();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -116,9 +128,20 @@ const Empleados = () => {
                         <Button
                             variant="primary"
                             className="color_boton_registrar"
-                            onClick={() => setMostrarModal(true)}
+                            onClick={() => {
+                                setNuevoEmpleado({
+                                    primer_nombre: '',
+                                    segundo_nombre: '',
+                                    primer_apellido: '',
+                                    segundo_apellido: '',
+                                    celular: '',
+                                    cargo: '',
+                                    fecha_contratacion: ''
+                                });
+                                setMostrarModal(true);
+                            }}
                         >
-                            + Nueva Empleado
+                            + Nuevo Empleado
                         </Button>
                     </Col>
 
@@ -133,7 +156,7 @@ const Empleados = () => {
                 <ModalRegistroEmpleado
                     mostrarModal={mostrarModal}
                     setMostrarModal={setMostrarModal}
-                    nuevaEmpleado={nuevaEmpleado}
+                    nuevoEmpleado={nuevoEmpleado}
                     manejarCambioInput={manejarCambioInput}
                     agregarEmpleado={agregarEmpleado}
                 />

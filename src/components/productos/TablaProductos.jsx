@@ -1,6 +1,17 @@
+import React, { useState } from "react";
 import { Spinner, Table } from "react-bootstrap";
+import BotonOrden from "../ordenamiento/BotonOrden";
+
 
 const TablaProductos = ({ productos, cargando }) => {
+    const [orden, setOrden] = useState({ campo: "id_producto", direccion: "asc" });
+
+    const manejarOrden = (campo) => {
+        setOrden((prev) => ({
+            campo,
+            direccion: prev.campo === campo && prev.direccion === "asc" ? "desc" : "asc",
+        }));
+    };
 
     if (cargando) {
         return (
@@ -8,27 +19,41 @@ const TablaProductos = ({ productos, cargando }) => {
                 <Spinner animation="border" role="status">
                     <span className="visually-hidden"> Cargando... </span>
                 </Spinner>
-
             </>
-        )
+        );
     }
+
+    const productosArray = Array.isArray(productos) ? productos : [];
+
+    const productosOrdenados = productosArray.slice().sort((a, b) => {
+        const valorA = a[orden.campo] ?? "";
+        const valorB = b[orden.campo] ?? "";
+
+        if (typeof valorA === "number" && typeof valorB === "number") {
+            return orden.direccion === "asc" ? valorA - valorB : valorB - valorA;
+        }
+
+        const comparacion = String(valorA).localeCompare(String(valorB));
+        return orden.direccion === "asc" ? comparacion : -comparacion;
+    });
+
     return (
         <Table striped bordered hover>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>nombre_producto </th>
-                    <th>descripcion_producto</th>
-                    <th>id_categoria</th>
-                    <th>precio_unitario</th>
-                    <th>stock</th>
+                    <BotonOrden campo="id_producto" orden={orden} manejarOrden={manejarOrden}>ID</BotonOrden>
+                    <BotonOrden campo="nombre_producto" orden={orden} manejarOrden={manejarOrden}>nombre_producto</BotonOrden>
+                    <BotonOrden campo="descripcion_producto" orden={orden} manejarOrden={manejarOrden}>descripcion_producto</BotonOrden>
+                    <BotonOrden campo="id_categoria" orden={orden} manejarOrden={manejarOrden}>id_categoria</BotonOrden>
+                    <BotonOrden campo="precio_unitario" orden={orden} manejarOrden={manejarOrden}>precio_unitario</BotonOrden>
+                    <BotonOrden campo="stock" orden={orden} manejarOrden={manejarOrden}>stock</BotonOrden>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                {productos.map((producto) => {
+                {productosOrdenados.map((producto) => {
                     return (
-                        <tr key={productos.id_producto}>
+                        <tr key={producto.id_producto}>
                             <td>{producto.id_producto}</td>
                             <td>{producto.nombre_producto}</td>
                             <td>{producto.descripcion_producto}</td>
@@ -42,6 +67,6 @@ const TablaProductos = ({ productos, cargando }) => {
             </tbody>
         </Table>
     );
-}
+};
 
 export default TablaProductos;

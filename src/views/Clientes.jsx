@@ -1,3 +1,4 @@
+// ...existing code...
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import TablaClientes from "../components/clientes/TablaClientes";
@@ -29,7 +30,7 @@ const Clientes = () => {
 
 
     const agregarCliente = async () => {
-        if (!nuevaCliente.primer_nombre.trim()) return;
+        if (!String(nuevaCliente.primer_nombre ?? "").trim()) return;
 
         try {
             const respuesta = await fetch('http://localhost:3000/api/registrarcliente', {
@@ -58,9 +59,8 @@ const Clientes = () => {
         }
     };
 
-
-
     const obtenerClientes = async () => {
+        setCargando(true);
         try {
             const respuesta = await fetch("http://localhost:3000/api/clientes");
             if (!respuesta.ok) {
@@ -69,30 +69,39 @@ const Clientes = () => {
 
             const datos = await respuesta.json();
 
-            setClientes(datos);
-            setClientesFiltrados(datos);
-            setCargando(false);
-
+            setClientes(datos || []);
+            setClientesFiltrados(datos || []);
         } catch (error) {
             console.log(error.message);
+            setClientes([]);
+            setClientesFiltrados([]);
+        } finally {
             setCargando(false);
         }
     };
 
-const manejarCambioBusqueda = (e) => {
-        const texto = e.target.value.toLowerCase();
+    const manejarCambioBusqueda = (e) => {
+        const texto = String(e.target?.value ?? "").toLowerCase();
         setTextoBusqueda(texto);
-        const filtradas = clientes.filter(
-            (cliente) =>
-                cliente.primer_nombre.toLowerCase().includes(texto) ||
-                cliente.segundo_nombre.toLowerCase().includes(texto) ||
-                cliente.primer_apellido.toLowerCase().includes(texto) ||
-                cliente.segundo_apellido.toLowerCase().includes(texto) ||
-                cliente.celular.toLowerCase().includes(texto) ||
-                cliente.direccion.toLowerCase().includes(texto) ||
-                cliente.cedula.toLowerCase().includes(texto) 
-                
-        );
+        const filtradas = (clientes || []).filter((cliente) => {
+            const primer = String(cliente?.primer_nombre ?? "").toLowerCase();
+            const segundo = String(cliente?.segundo_nombre ?? "").toLowerCase();
+            const pApellido = String(cliente?.primer_apellido ?? "").toLowerCase();
+            const sApellido = String(cliente?.segundo_apellido ?? "").toLowerCase();
+            const celular = String(cliente?.celular ?? "").toLowerCase();
+            const direccion = String(cliente?.direccion ?? "").toLowerCase();
+            const cedula = String(cliente?.cedula ?? "").toLowerCase();
+
+            return (
+                primer.includes(texto) ||
+                segundo.includes(texto) ||
+                pApellido.includes(texto) ||
+                sApellido.includes(texto) ||
+                celular.includes(texto) ||
+                direccion.includes(texto) ||
+                cedula.includes(texto)
+            );
+        });
         setClientesFiltrados(filtradas);
     };
 
@@ -118,7 +127,18 @@ const manejarCambioBusqueda = (e) => {
                         <Button
                             variant="primary"
                             className="color_boton_registrar"
-                            onClick={() => setMostrarModal(true)}
+                            onClick={() => {
+                                setNuevaCliente({
+                                    primer_nombre: '',
+                                    segundo_nombre: '',
+                                    primer_apellido: '',
+                                    segundo_apellido: '',
+                                    celular: '',
+                                    direccion: '',
+                                    cedula: ''
+                                });
+                                setMostrarModal(true);
+                            }}
                         >
                             + Nueva Cliente
                         </Button>
@@ -131,10 +151,10 @@ const manejarCambioBusqueda = (e) => {
                     cargando={cargando}
                 />
 
-  <ModalRegistroCategoria
+                <ModalRegistroCliente
                     mostrarModal={mostrarModal}
                     setMostrarModal={setMostrarModal}
-                    nuevaClientes={nuevaCliente}
+                    nuevoCliente={nuevaCliente}
                     manejarCambioInput={manejarCambioInput}
                     agregarCliente={agregarCliente}
                 />

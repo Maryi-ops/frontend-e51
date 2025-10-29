@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Spinner, Table } from "react-bootstrap";
 import BotonOrden from "../ordenamiento/BotonOrden";
 
+
 const TablaCategorias = ({ categorias, cargando }) => {
 
     const [orden, setOrden] = useState({ campo: "id_categoria", direccion: "asc" });
@@ -14,9 +15,12 @@ const TablaCategorias = ({ categorias, cargando }) => {
         }));
     };
 
-    const categoriasOrdenadas = [...categorias].sort((a, b) => {
-        const valorA = a[orden.campo];
-        const valorB = b[orden.campo];
+    // Usar un array seguro y proteger valores null/undefined al ordenar
+    const categoriasArray = Array.isArray(categorias) ? categorias : [];
+
+    const categoriasOrdenadas = categoriasArray.slice().sort((a, b) => {
+        const valorA = a[orden.campo] ?? "";
+        const valorB = b[orden.campo] ?? "";
 
         if (typeof valorA === "number" && typeof valorB === "number") {
             return orden.direccion === "asc" ? valorA - valorB : valorB - valorA;
@@ -26,15 +30,13 @@ const TablaCategorias = ({ categorias, cargando }) => {
         return orden.direccion === "asc" ? comparacion : -comparacion;
     });
 
-
-
+ 
     if (cargando) {
         return (
             <>
                 <Spinner animation="border" role="status">
-                    <span className="visually-hidden"> Cargando... </span>
+                    <span className="visually-hidden">Cargando...</span>
                 </Spinner>
-
             </>
         )
     }
@@ -43,6 +45,7 @@ const TablaCategorias = ({ categorias, cargando }) => {
             <thead>
                 <tr>
 
+                    {/* Asegurarse que BotonOrden renderice un <th>; si no, envolverlo */}
                     <BotonOrden campo="id_categoria" orden={orden} manejarOrden={manejarOrden}>
                         ID
                     </BotonOrden>
@@ -54,7 +57,6 @@ const TablaCategorias = ({ categorias, cargando }) => {
                     <BotonOrden campo="descripcion_categoria" orden={orden} manejarOrden={manejarOrden}>
                         Descripción Categoría
                     </BotonOrden>
-
 
                     <th>Acciones</th>
                 </tr>
@@ -74,5 +76,6 @@ const TablaCategorias = ({ categorias, cargando }) => {
         </Table>
     );
 }
-
 export default TablaCategorias;
+
+

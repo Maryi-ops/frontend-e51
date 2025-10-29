@@ -1,9 +1,10 @@
+
 import { Modal, Form, Button } from "react-bootstrap";
 
 const ModalRegistroCategoria = ({
   mostrarModal,
   setMostrarModal,
-  nuevaCategoria,
+  nuevaCategoria = { nombre_categoria: "", descripcion_categoria: "" },
   manejarCambioInput,
   agregarCategoria,
 }) => {

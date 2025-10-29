@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import TablaCompras from "../components/compras/TablaCompras";
 import CuadroBusquedas from "../components/Busquedas/CuadroBusquedas";
-
 
 const Compras = () => {
     const [compras, setCompras] = useState([]);
@@ -11,9 +10,8 @@ const Compras = () => {
     const [comprasFiltradas, setComprasFiltradas] = useState([]);
     const [textoBusqueda, setTextoBusqueda] = useState("");
 
-
-
     const obtenerCompras = async () => {
+        setCargando(true);
         try {
             const respuesta = await fetch("http://localhost:3000/api/compras");
             if (!respuesta.ok) {
@@ -22,36 +20,36 @@ const Compras = () => {
 
             const datos = await respuesta.json();
 
-            setCompras(datos);
-            setComprasFiltradas(datos);
-            setCargando(false);
-
+            setCompras(datos || []);
+            setComprasFiltradas(datos || []);
         } catch (error) {
             console.log(error.message);
+            setCompras([]);
+            setComprasFiltradas([]);
+        } finally {
             setCargando(false);
         }
     };
 
     const manejarCambioBusqueda = (e) => {
-        const texto = e.target.value.toLowerCase();
+        const texto = String(e.target?.value ?? "").toLowerCase();
         setTextoBusqueda(texto);
-        const filtradas = compras.filter(
-            (compra) =>
-                compra.fecha_compra.toLowerCase().includes(texto) ||
-                compra.total_compra.toLowerCase().includes(texto)
-        );
+        const filtradas = (compras || []).filter((compra) => {
+            const fecha = String(compra?.fecha_compra ?? "").toLowerCase();
+            const total = String(compra?.total_compra ?? "").toLowerCase();
+            return fecha.includes(texto) || total.includes(texto);
+        });
         setComprasFiltradas(filtradas);
     };
 
-
     useEffect(() => {
         obtenerCompras();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
         <>
             <Container className="mt-4">
-
                 <h4>Compras</h4>
 
                 <Row>
@@ -63,14 +61,10 @@ const Compras = () => {
                     </Col>
                 </Row>
 
-                <TablaCompras
-                    compras={comprasFiltradas}
-                    cargando={cargando}
-                />
-
+                <TablaCompras compras={comprasFiltradas} cargando={cargando} />
             </Container>
         </>
     );
-}
+};
 
 export default Compras;

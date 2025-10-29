@@ -1,9 +1,10 @@
+
 import { Modal, Form, Button } from "react-bootstrap";
 
 const ModalRegistroUsuario = ({
   mostrarModal,
   setMostrarModal,
-  nuevoUsuario,
+  nuevoUsuario = { usuario: "", contraseña: "" },
   manejarCambioInput,
   agregarUsuario,
 }) => {
@@ -47,7 +48,7 @@ const ModalRegistroUsuario = ({
         <Button
           variant="primary"
           onClick={agregarUsuario}
-          disabled={!nuevoUsuario.usuario.trim()}
+          disabled={!String(nuevoUsuario.usuario ?? "").trim()}
         >
           Guardar Usuario
         </Button>

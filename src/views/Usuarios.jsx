@@ -22,9 +22,8 @@ const Usuarios = () => {
         setNuevoUsuario(prev => ({ ...prev, [name]: value }));
     };
 
-
     const agregarUsuario = async () => {
-        if (!nuevoUsuario.usuario.trim()) return;
+        if (!String(nuevoUsuario.usuario ?? "").trim()) return;
 
         try {
             const respuesta = await fetch('http://localhost:3000/api/registrarusuario', {
@@ -46,6 +45,7 @@ const Usuarios = () => {
     };
 
     const obtenerUsuarios = async () => {
+        setCargando(true);
         try {
             const respuesta = await fetch("http://localhost:3000/api/usuarios");
             if (!respuesta.ok) {
@@ -54,31 +54,31 @@ const Usuarios = () => {
 
             const datos = await respuesta.json();
 
-            setUsuarios(datos);
-            setUsuariosFiltradas(datos);
-            setCargando(false);
-
+            setUsuarios(datos || []);
+            setUsuariosFiltradas(datos || []);
         } catch (error) {
             console.log(error.message);
+            setUsuarios([]);
+            setUsuariosFiltradas([]);
+        } finally {
             setCargando(false);
         }
     };
 
-
     const manejarCambioBusqueda = (e) => {
-        const texto = e.target.value.toLowerCase();
+        const texto = String(e.target?.value ?? "").toLowerCase();
         setTextoBusqueda(texto);
-        const filtradas = usuarios.filter(
-            (usuario) =>
-                usuario.usuario.toLowerCase().includes(texto) ||
-                usuario.contraseña.toLowerCase().includes(texto)
-        );
+        const filtradas = (usuarios || []).filter((usuario) => {
+            const u = String(usuario?.usuario ?? "").toLowerCase();
+            const p = String(usuario?.contraseña ?? "").toLowerCase();
+            return u.includes(texto) || p.includes(texto);
+        });
         setUsuariosFiltradas(filtradas);
     };
 
-
     useEffect(() => {
         obtenerUsuarios();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -98,13 +98,15 @@ const Usuarios = () => {
                         <Button
                             variant="primary"
                             className="color_boton_registrar"
-                            onClick={() => setMostrarModal(true)}
+                            onClick={() => {
+                                setNuevoUsuario({ usuario: '', contraseña: '' });
+                                setMostrarModal(true);
+                            }}
                         >
-                            + Nueva Usuario
+                            + Nuevo Usuario
                         </Button>
                     </Col>
                 </Row>
-
 
                 <TablaUsuarios
                     usuarios={usuariosFiltradas}
@@ -112,7 +114,6 @@ const Usuarios = () => {
                 />
 
                 <ModalRegistroUsuario
-
                     mostrarModal={mostrarModal}
                     setMostrarModal={setMostrarModal}
                     nuevoUsuario={nuevoUsuario}
