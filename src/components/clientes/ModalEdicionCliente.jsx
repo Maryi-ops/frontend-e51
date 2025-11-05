@@ -1,19 +1,28 @@
+
 import { Modal, Form, Button } from "react-bootstrap";
 
 const ModalEdicionCliente = ({
   mostrar,
   setMostrar,
-  clienteEditado,
+  clienteEditado = {
+    primer_nombre: "",
+    segundo_nombre: "",
+    primer_apellido: "",
+    segundo_apellido: "",
+    celular: "",
+    direccion: "",
+    cedula: "",
+  },
   setClienteEditado,
   guardarEdicion,
 }) => {
   const manejarCambio = (e) => {
     const { name, value } = e.target;
-    setClienteEditado((prev) => ({ ...prev, [name]: value }));
+    setClienteEditado?.((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
-    <Modal backdrop="static" show={mostrar} onHide={() => setMostrar(false)} centered>
+    <Modal backdrop="static" show={mostrar} onHide={() => setMostrar?.(false)} centered>
       <Modal.Header closeButton>
         <Modal.Title>Editar Cliente</Modal.Title>
       </Modal.Header>
@@ -105,11 +114,10 @@ const ModalEdicionCliente = ({
               maxLength={20}
             />
           </Form.Group>
-
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => setMostrar(false)}>
+        <Button variant="secondary" onClick={() => setMostrar?.(false)}>
           Cancelar
         </Button>
         <Button

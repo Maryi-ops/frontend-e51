@@ -1,16 +1,16 @@
 import { Modal, Button } from "react-bootstrap";
 
-const ModalEliminacionCliente = ({
+const ModalEliminacionEmpleado = ({
   mostrar,
   setMostrar,
-  cliente,
+  empleado,
   confirmarEliminacion,
 }) => {
   const nombreCompleto = [
-    cliente?.primer_nombre,
-    cliente?.segundo_nombre,
-    cliente?.primer_apellido,
-    cliente?.segundo_apellido,
+    empleado?.primer_nombre,
+    empleado?.segundo_nombre,
+    empleado?.primer_apellido,
+    empleado?.segundo_apellido,
   ]
     .filter(Boolean)
     .join(" ");
@@ -22,8 +22,8 @@ const ModalEliminacionCliente = ({
       </Modal.Header>
       <Modal.Body>
         <p>
-          ¿Estás seguro de que deseas eliminar el cliente{" "}
-          <strong>"{nombreCompleto || cliente?.id_cliente || ""}"</strong>?
+          ¿Estás seguro de que deseas eliminar el empleado{" "}
+          <strong>"{nombreCompleto || empleado?.id_empleado || ""}"</strong>?
         </p>
         <p className="text-muted small">Esta acción no se puede deshacer.</p>
       </Modal.Body>
@@ -39,4 +39,4 @@ const ModalEliminacionCliente = ({
   );
 };
 
-export default ModalEliminacionCliente;
+export default ModalEliminacionEmpleado;

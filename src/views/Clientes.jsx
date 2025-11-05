@@ -21,6 +21,9 @@ const Clientes = () => {
     const [clienteEditado, setClienteEditado] = useState(null);
     const [clienteAEliminar, setClienteAEliminar] = useState(null);
 
+    const [paginaActual, establecerPaginaActual] = useState(1);
+    const elementosPorPagina = 5; // Número de productos por página
+
     const [mostrarModal, setMostrarModal] = useState(false);
     const [nuevaCliente, setNuevaCliente] = useState({
         primer_nombre: '',
@@ -31,6 +34,12 @@ const Clientes = () => {
         direccion: '',
         cedula: ''
     });
+
+    // Calcular productos paginados
+    const clientesPaginadas = clientesFiltrados.slice(
+        (paginaActual - 1) * elementosPorPagina,
+        paginaActual * elementosPorPagina
+    );
 
 
     const manejarCambioInput = (e) => {
@@ -46,7 +55,7 @@ const Clientes = () => {
     const guardarEdicion = async () => {
         if (!String(clienteEditado?.primer_nombre ?? "").trim()) return;
         try {
-            const respuesta = await fetch(`http://localhost:3000/api/actualizarcliente/${clienteEditado.id_cliente}`, {
+            const respuesta = await fetch(`http://localhost:3000/api/actualizarclientes/${clienteEditado.id_cliente}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(clienteEditado)
@@ -67,7 +76,7 @@ const Clientes = () => {
 
     const confirmarEliminacion = async () => {
         try {
-            const respuesta = await fetch(`http://localhost:3000/api/eliminarcliente/${clienteAEliminar.id_cliente}`, {
+            const respuesta = await fetch(`http://localhost:3000/api/eliminarclientes/${clienteAEliminar.id_cliente}`, {
                 method: 'DELETE',
             });
             if (!respuesta.ok) throw new Error('Error al eliminar');
@@ -85,7 +94,7 @@ const Clientes = () => {
         if (!String(nuevaCliente.primer_nombre ?? "").trim()) return;
 
         try {
-            const respuesta = await fetch('http://localhost:3000/api/registrarcliente', {
+            const respuesta = await fetch('http://localhost:3000/api/registrarclientes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(nuevaCliente)
@@ -199,10 +208,14 @@ const Clientes = () => {
 
 
                 <TablaClientes
-                    clientes={clientesFiltrados}
+                    clientes={clientesPaginadas}
                     cargando={cargando}
                     abrirModalEdicion={abrirModalEdicion}
                     abrirModalEliminacion={abrirModalEliminacion}
+                    totalElementos={clientes.length} // Total de categorias
+                    elementosPorPagina={elementosPorPagina} // Elementos por página
+                    paginaActual={paginaActual} // Página actual
+                    establecerPaginaActual={establecerPaginaActual} // Método para cambiar página
                 />
 
                 <ModalRegistroCliente

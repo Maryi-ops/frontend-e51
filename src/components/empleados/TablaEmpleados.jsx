@@ -40,6 +40,7 @@ const TablaEmpleados = ({ empleados, cargando }) => {
     }
 
     return (
+        <>
         <Table striped bordered hover>
             <thead>
                 <tr>
@@ -70,6 +71,13 @@ const TablaEmpleados = ({ empleados, cargando }) => {
                 ))}
             </tbody>
         </Table>
+          <Paginacion
+                elementosPorPagina={elementosPorPagina}
+                totalElementos={totalElementos}
+                paginaActual={paginaActual}
+                establecerPaginaActual={establecerPaginaActual}
+            />
+        </>
     );
 };
 
