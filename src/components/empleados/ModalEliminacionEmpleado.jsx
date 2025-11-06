@@ -6,15 +6,6 @@ const ModalEliminacionEmpleado = ({
   empleado,
   confirmarEliminacion,
 }) => {
-  const nombreCompleto = [
-    empleado?.primer_nombre,
-    empleado?.segundo_nombre,
-    empleado?.primer_apellido,
-    empleado?.segundo_apellido,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
   return (
     <Modal show={mostrar} onHide={() => setMostrar(false)} centered>
       <Modal.Header closeButton>
@@ -22,10 +13,14 @@ const ModalEliminacionEmpleado = ({
       </Modal.Header>
       <Modal.Body>
         <p>
-          ¿Estás seguro de que deseas eliminar el empleado{" "}
-          <strong>"{nombreCompleto || empleado?.id_empleado || ""}"</strong>?
+          ¿Estás seguro de que deseas eliminar al empleado{" "}
+          <strong>
+            {empleado?.primer_nombre} {empleado?.primer_apellido}
+          </strong>?
         </p>
-        <p className="text-muted small">Esta acción no se puede deshacer.</p>
+        <p className="text-muted small">
+          Esta acción no se puede deshacer.
+        </p>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={() => setMostrar(false)}>
@@ -40,3 +35,4 @@ const ModalEliminacionEmpleado = ({
 };
 
 export default ModalEliminacionEmpleado;
+

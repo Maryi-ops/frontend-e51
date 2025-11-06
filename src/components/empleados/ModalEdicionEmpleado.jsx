@@ -1,79 +1,143 @@
-import React from "react";
-import { Modal, Form, Button } from "react-bootstrap";
+import { Modal, Form, Button, Row, Col } from "react-bootstrap";
 
-const ModalEdicionCompra = ({
+const ModalEdicionEmpleado = ({
   mostrar,
   setMostrar,
-  compraEditada = { id_empleado: "", fecha_compra: "", total_compra: "" },
-  setCompraEditada,
+  empleadoEditado,
+  setEmpleadoEditado,
   guardarEdicion,
 }) => {
+
   const manejarCambio = (e) => {
     const { name, value } = e.target;
-    setCompraEditada?.((prev) => ({ ...prev, [name]: value }));
+    setEmpleadoEditado((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
-    <Modal backdrop="static" show={mostrar} onHide={() => setMostrar?.(false)} centered>
+    <Modal backdrop="static" show={mostrar} onHide={() => setMostrar(false)} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Editar Compra</Modal.Title>
+        <Modal.Title>Editar Empleado</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
-          <Form.Group className="mb-3" controlId="idEmpleado">
-            <Form.Label>ID Empleado</Form.Label>
-            <Form.Control
-              type="text"
-              name="id_empleado"
-              value={compraEditada?.id_empleado ?? ""}
-              onChange={manejarCambio}
-              placeholder="ID del empleado"
-              maxLength={50}
-              required
-              autoFocus
-            />
-          </Form.Group>
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3" controlId="primer_nombre">
+                <Form.Label>Primer Nombre *</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="primer_nombre"
+                  value={empleadoEditado?.primer_nombre || ''}
+                  onChange={manejarCambio}
+                  maxLength={20}
+                  required
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3" controlId="segundo_nombre">
+                <Form.Label>Segundo Nombre</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="segundo_nombre"
+                  value={empleadoEditado?.segundo_nombre || ''}
+                  onChange={manejarCambio}
+                  maxLength={20}
+                />
+              </Form.Group>
+            </Col>
+          </Row>
 
-          <Form.Group className="mb-3" controlId="fechaCompra">
-            <Form.Label>Fecha de Compra</Form.Label>
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3" controlId="primer_apellido">
+                <Form.Label>Primer Apellido *</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="primer_apellido"
+                  value={empleadoEditado?.primer_apellido || ''}
+                  onChange={manejarCambio}
+                  maxLength={20}
+                  required
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3" controlId="segundo_apellido">
+                <Form.Label>Segundo Apellido</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="segundo_apellido"
+                  value={empleadoEditado?.segundo_apellido || ''}
+                  onChange={manejarCambio}
+                  maxLength={20}
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3" controlId="celular">
+                <Form.Label>Celular</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="celular"
+                  value={empleadoEditado?.celular || ''}
+                  onChange={manejarCambio}
+                  maxLength={8}
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3" controlId="cargo">
+                <Form.Label>Cargo</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="cargo"
+                  value={empleadoEditado?.cargo || ''}
+                  onChange={manejarCambio}
+                  maxLength={20}
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Form.Group className="mb-3" controlId="fecha_contratacion">
+            <Form.Label>Fecha de Contratación *</Form.Label>
             <Form.Control
               type="date"
-              name="fecha_compra"
-              value={compraEditada?.fecha_compra ?? ""}
+              name="fecha_contratacion"
+              value={
+                empleadoEditado?.fecha_contratacion
+                  ? new Date(empleadoEditado.fecha_contratacion).toISOString().split("T")[0]
+                  : ""
+              }
               onChange={manejarCambio}
               required
             />
           </Form.Group>
 
-          <Form.Group className="mb-3" controlId="totalCompra">
-            <Form.Label>Total</Form.Label>
-            <Form.Control
-              type="number"
-              name="total_compra"
-              value={compraEditada?.total_compra ?? ""}
-              onChange={manejarCambio}
-              placeholder="0.00"
-              step="0.01"
-              min="0"
-              required
-            />
-          </Form.Group>
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => setMostrar?.(false)}>
+        <Button variant="secondary" onClick={() => setMostrar(false)}>
           Cancelar
         </Button>
         <Button
           variant="primary"
           onClick={guardarEdicion}
-          disabled={!String(compraEditada?.id_empleado ?? "").trim() || !String(compraEditada?.total_compra ?? "").trim()}
+          disabled={
+            !empleadoEditado?.primer_nombre?.trim() ||
+            !empleadoEditado?.primer_apellido?.trim() ||
+            !empleadoEditado?.fecha_contratacion
+          }
         >
           Guardar Cambios
         </Button>
       </Modal.Footer>
     </Modal>
-  );
+  ); 
 };
 
-export default ModalEdicionCompra;
+export default ModalEdicionEmpleado;
