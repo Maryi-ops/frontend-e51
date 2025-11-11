@@ -86,6 +86,28 @@ const ModalRegistroProducto = ({
               required
             />
           </Form.Group>
+
+          <Form.Group className="mb-3" controlId="formImagenProducto">
+            <Form.Label>Imagen</Form.Label>
+            <Form.Control
+              type="file"
+              name="imagen"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    manejarCambioInput({
+                      target: { name: 'imagen', value: reader.result.split(',')[1] } // Extrae solo la parte Base64
+                    });
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+          </Form.Group>
+
         </Form>
       </Modal.Body>
       <Modal.Footer>

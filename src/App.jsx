@@ -16,7 +16,7 @@ import Catalogo from "./views/Catalogo";
 import Clientes from './views/Clientes';
 import Empleados from './views/Empleados';
 import Usuarios from './views/Usuarios';
-import Ventas from './views/Ventas';
+import Ventas from './views/Ventas.jsx';
 
 
 const App = () =>{
