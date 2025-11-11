@@ -2,11 +2,11 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import TablaVentas from '../components/ventas/TablaVentas';
-import CuadroBusquedas from '../components/Busquedas/CuadroBusquedas';
+import CuadroBusquedas from '../components/busquedas/CuadroBusquedas';
 import ModalRegistroVenta from '../components/ventas/ModalRegistroVenta';
 import ModalEdicionVenta from '../components/ventas/ModalEdicionVenta';
 import ModalEliminacionVenta from '../components/ventas/ModalEliminacionVenta';
-import ModalDetallesVenta from '../components/detalles_ventas/ModalDetallesVenta.jsx';
+import ModalDetallesVenta from '../components/detalles_ventas/ModalDetallesVenta';
 
 const Ventas = () => {
     const [ventas, setVentas] = useState([]);
@@ -194,7 +194,7 @@ const Ventas = () => {
         const total = detallesNuevos.reduce((sum, d) => sum + (d.cantidad * d.precio_unitario), 0);
 
         try {
-            const ventaResp = await fetch('http://localhost:3000/api/registrardetallesventas', {
+            const ventaResp = await fetch('http://localhost:3000/api/registrarventa', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...nuevaVenta, total_venta: total })
@@ -204,7 +204,7 @@ const Ventas = () => {
             const { id_venta } = await ventaResp.json();
 
             for (const d of detallesNuevos) {
-                await fetch('http://localhost:3000/api/registrardetallesventas', {
+                await fetch('http://localhost:3000/api/registrardetalleventa', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ...d, id_venta })
@@ -249,7 +249,7 @@ const Ventas = () => {
     const actualizarVenta = async () => {
         const total = detallesNuevos.reduce((sum, d) => sum + (d.cantidad * d.precio_unitario), 0);
         try {
-            await fetch(`http://localhost:3000/api/actualizarventas/${ventaAEditar.id_venta}`, {
+            await fetch(`http://localhost:3000/api/actualizarventa/${ventaAEditar.id_venta}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...ventaEnEdicion, total_venta: total })
@@ -259,11 +259,11 @@ const Ventas = () => {
             const todos = await resp.json();
             const actuales = todos.filter(d => d.id_venta === ventaAEditar.id_venta);
             for (const d of actuales) {
-                await fetch(`http://localhost:3000/api/eliminardetalleventas/${d.id_detalle_venta}`, { method: 'DELETE' });
+                await fetch(`http://localhost:3000/api/eliminardetalleventa/${d.id_detalle_venta}`, { method: 'DELETE' });
             }
 
             for (const d of detallesNuevos) {
-                await fetch('http://localhost:3000/api/registrardetallesventas', {
+                await fetch('http://localhost:3000/api/registrardetalleventa', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ...d, id_venta: ventaAEditar.id_venta })
