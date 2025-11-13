@@ -47,6 +47,7 @@ const TablaProductos = ({ productos, cargando }) => {
                     <BotonOrden campo="id_categoria" orden={orden} manejarOrden={manejarOrden}>id_categoria</BotonOrden>
                     <BotonOrden campo="precio_unitario" orden={orden} manejarOrden={manejarOrden}>precio_unitario</BotonOrden>
                     <BotonOrden campo="stock" orden={orden} manejarOrden={manejarOrden}>stock</BotonOrden>
+                    <BotonOrden campo="imagen" orden={orden} manejarOrden={manejarOrden}>imagen</BotonOrden>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -60,12 +61,24 @@ const TablaProductos = ({ productos, cargando }) => {
                             <td>{producto.id_categoria}</td>
                             <td>{producto.precio_unitario}</td>
                             <td>{producto.stock}</td>
-                            <td>Accion</td>
+                            <td>
+                                {producto.imagen ? (
+                                    <img
+                                        src={`data: image / png;base64,${producto.imagen}`}
+                                        alt={producto.nombre_producto}
+                                        width={50}
+                                        height={50}
+                                        style={{ objectFit: 'cover' }}
+                                    />
+                                ) : (
+                                    'Sin imagen'
+                                )}
+                            </td>
                         </tr>
                     );
                 })}
             </tbody>
-        </Table>
+        </Table >
     );
 };
 

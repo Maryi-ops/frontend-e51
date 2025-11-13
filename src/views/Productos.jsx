@@ -123,7 +123,7 @@ const Productos = () => {
         if (!String(nuevoProducto.nombre_producto ?? "").trim()) return;
 
         try {
-            const respuesta = await fetch("http://localhost:3000/api/registrarproducto", {
+            const respuesta = await fetch("http://localhost:3000/api/productos", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(nuevoProducto),
@@ -135,6 +135,7 @@ const Productos = () => {
                 id_categoria: "",
                 precio_unitario: "",
                 stock: "",
+                imagen: ""
             });
             setMostrarModal(false);
             await obtenerProductos();
@@ -153,12 +154,14 @@ const Productos = () => {
             const categoria = String(p?.id_categoria ?? "").toLowerCase();
             const precio = String(p?.precio_unitario ?? "").toLowerCase();
             const stock = String(p?.stock ?? "").toLowerCase();
+            const imagen = String(p?.imagen?? "").toLowerCase();
             return (
                 nombre.includes(texto) ||
                 descripcion.includes(texto) ||
                 categoria.includes(texto) ||
                 precio.includes(texto) ||
-                stock.includes(texto)
+                stock.includes(texto) ||
+                imagen.includes(texto) 
             );
         });
         setProductosFiltradas(filtradas);
@@ -192,6 +195,7 @@ const Productos = () => {
                                     id_categoria: "",
                                     precio_unitario: "",
                                     stock: "",
+                                    imagen: ""
                                 });
                                 setMostrarModal(true);
                             }}

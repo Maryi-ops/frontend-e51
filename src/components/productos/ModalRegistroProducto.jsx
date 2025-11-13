@@ -50,7 +50,7 @@ const ModalRegistroProducto = ({
           <Form.Group className="mb-3" controlId="categoria">
             <Form.Label>ID categoría</Form.Label>
             <Form.Control
-              type="text"
+              type="number"
               name="id_categoria"
               value={nuevoProducto.id_categoria}
               onChange={manejarCambioInput}

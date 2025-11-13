@@ -1,72 +1,117 @@
-import { Modal, Form, Button } from "react-bootstrap";
+import { useState } from "react";
+import { Modal, Form, Button, Table, Row, Col, FormControl } from "react-bootstrap";
 
 const ModalRegistroCompra = ({
-  mostrarModal,
-  setMostrarModal,
-  nuevoCompra = { id_empleado: "", fecha_compra: "", total_compra: "" },
-  manejarCambioInput,
-  agregarCompra,
+  mostrar, setMostrar, nuevaCompra, setNuevaCompra,
+  detalles, setDetalles, empleados, productos, agregarCompra, hoy
 }) => {
+  const [productoSel, setProductoSel] = useState('');
+  const [nuevoDetalle, setNuevoDetalle] = useState({ id_producto: '', cantidad: '' });
+
+  const total = detalles.reduce((s, d) => s + (d.cantidad * d.precio_unitario), 0);
+
+  const manejarProducto = (e) => {
+    const id = e.target.value;
+    setProductoSel(id);
+    const prod = productos.find(p => p.id_producto === parseInt(id));
+    setNuevoDetalle(prev => ({ ...prev, id_producto: id, precio_unitario: prod ? prod.precio_unitario : 0 }));
+  };
+
+  const agregarDetalle = () => {
+    if (!nuevoDetalle.id_producto || !nuevoDetalle.cantidad || nuevoDetalle.cantidad <= 0) {
+      alert("Selecciona producto y cantidad válida.");
+      return;
+    }
+
+    const prod = productos.find(p => p.id_producto === parseInt(nuevoDetalle.id_producto));
+    if (prod && nuevoDetalle.cantidad > prod.stock) {
+      alert`(Stock insuficiente: ${ prod.stock })`;
+      return;
+    }
+
+    setDetalles(prev => [...prev, {
+      id_producto: parseInt(nuevoDetalle.id_producto),
+      nombre_producto: prod ? prod.nombre_producto : 'N/D',
+      cantidad: parseInt(nuevoDetalle.cantidad),
+      precio_unitario: parseFloat(nuevoDetalle.precio_unitario)
+    }]);
+
+    setNuevoDetalle({ id_producto: '', cantidad: '' });
+    setProductoSel('');
+  };
+
   return (
-    <Modal show={mostrarModal} onHide={() => setMostrarModal(false)} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>Registrar Compra</Modal.Title>
-      </Modal.Header>
+    <Modal backdrop="static" show={mostrar} onHide={setMostrar} size="xl" fullscreen="lg-down">
+      <Modal.Header closeButton><Modal.Title>Nueva Compra</Modal.Title></Modal.Header>
       <Modal.Body>
         <Form>
-          <Form.Group className="mb-3" controlId="idEmpleado">
-            <Form.Label>ID Empleado</Form.Label>
-            <Form.Control
-              type="text"
-              name="id_empleado"
-              value={nuevoCompra.id_empleado}
-              onChange={manejarCambioInput}
-              placeholder="ID del empleado"
-              maxLength={50}
-              required
-            />
-          </Form.Group>
+          <Row>
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Empleado</Form.Label>
+                <Form.Select value={nuevaCompra.id_empleado} onChange={e => setNuevaCompra(prev => ({ ...prev, id_empleado: e.target.value }))}>
+                  <option value="">Seleccionar</option>
+                  {empleados.map(emp => (
+                    <option key={emp.id_empleado} value={emp.id_empleado}>{emp.primer_nombre} {emp.primer_apellido}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Fecha</Form.Label>
+                <Form.Control type="date" value={nuevaCompra.fecha_compra} onChange={e => setNuevaCompra(prev => ({ ...prev, fecha_compra: e.target.value }))} max={hoy} />
+              </Form.Group>
+            </Col>
+          </Row>
 
-          <Form.Group className="mb-3" controlId="fechaCompra">
-            <Form.Label>Fecha de Compra</Form.Label>
-            <Form.Control
-              type="date"
-              name="fecha_compra"
-              value={nuevoCompra.fecha_compra}
-              onChange={manejarCambioInput}
-              required
-            />
-          </Form.Group>
+          <hr />
+          <h5>Agregar Producto</h5>
+          <Row>
+            <Col md={5}>
+              <Form.Select value={productoSel} onChange={manejarProducto}>
+                <option value="">Seleccionar producto</option>
+                {productos.map(p => (
+                  <option key={p.id_producto} value={p.id_producto}>{p.nombre_producto}</option>
+                ))}
+              </Form.Select>
+            </Col>
+            <Col md={3}>
+              <FormControl type="number" placeholder="Cantidad" value={nuevoDetalle.cantidad}
+                onChange={e => setNuevoDetalle(prev => ({ ...prev, cantidad: e.target.value }))} min="1" />
+            </Col>
+            <Col md={4}>
+              <Button variant="success" onClick={agregarDetalle} style={{ width: '100%' }}>Agregar</Button>
+            </Col>
+          </Row>
 
-          <Form.Group className="mb-3" controlId="totalCompra">
-            <Form.Label>Total</Form.Label>
-            <Form.Control
-              type="number"
-              name="total_compra"
-              value={nuevoCompra.total_compra}
-              onChange={manejarCambioInput}
-              placeholder="0.00"
-              step="0.01"
-              min="0"
-              required
-            />
-          </Form.Group>
+          {detalles.length > 0 && (
+            <Table striped className="mt-3">
+              <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead>
+              <tbody>
+                {detalles.map((d, i) => (
+                  <tr key={i}>
+                    <td>{d.nombre_producto}</td>
+                    <td>{d.cantidad}</td>
+                    <td>C$ {d.precio_unitario.toFixed(2)}</td>
+                    <td>C$ {(d.cantidad * d.precio_unitario).toFixed(2)}</td>
+                    <td><Button size="sm" variant="danger" onClick={() => setDetalles(prev => prev.filter((_, idx) => idx !== i))}>X</Button></td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan={3} className="text-end"><strong>Total:</strong></td>
+                  <td colSpan={2}><strong>C$ {total.toFixed(2)}</strong></td>
+                </tr>
+              </tfoot>
+            </Table>
+          )}
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => setMostrarModal(false)}>
-          Cancelar
-        </Button>
-        <Button
-          variant="primary"
-          onClick={agregarCompra}
-          disabled={
-            !String(nuevoCompra.id_empleado ?? "").trim() ||
-            !String(nuevoCompra.total_compra ?? "").trim()
-          }
-        >
-          Guardar Compra
-        </Button>
+        <Button variant="secondary" onClick={setMostrar}>Cancelar</Button>
+        <Button variant="primary" onClick={agregarCompra}>Guardar Compra</Button>
       </Modal.Footer>
     </Modal>
   );
