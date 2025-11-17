@@ -6,8 +6,10 @@ import ModalRegistroUsuario from '../components/usuarios/ModalRegistroUsuario';
 import ModalEdicionUsuario from '../components/usuarios/ModalEdicionUsuario';
 import ModalEliminacionUsuario from '../components/usuarios/ModalEliminacionUsuario';
 
-const Usuarios = () => {
+// Íconos PDF y Excel (opcional)
+import { FaFilePdf, FaFileExcel } from 'react-icons/fa';
 
+const Usuarios = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [usuariosFiltrados, setUsuariosFiltrados] = useState([]);
@@ -20,7 +22,6 @@ const Usuarios = () => {
     const [usuarioAEliminar, setUsuarioAEliminar] = useState(null);
     const [paginaActual, establecerPaginaActual] = useState(1);
     const elementosPorPagina = 5;
-
 
     const [nuevoUsuario, setNuevoUsuario] = useState({
         usuario: '',
@@ -38,7 +39,7 @@ const Usuarios = () => {
     };
 
     const agregarUsuario = async () => {
-    if (!nuevoUsuario.usuario.trim() || !nuevoUsuario.contraseña.trim()) return;
+        if (!nuevoUsuario.usuario.trim() || !nuevoUsuario.contraseña.trim()) return;
 
         try {
             const respuesta = await fetch('http://localhost:3000/api/registrarusuario', {
@@ -47,10 +48,7 @@ const Usuarios = () => {
                 body: JSON.stringify(nuevoUsuario)
             });
             if (!respuesta.ok) throw new Error('Error al guardar');
-            setNuevoUsuario({
-                usuario: '',
-                contraseña: ''
-            });
+            setNuevoUsuario({ usuario: '', contraseña: '' });
             setMostrarModal(false);
             await obtenerUsuarios();
         } catch (error) {
@@ -58,7 +56,6 @@ const Usuarios = () => {
             alert("No se pudo guardar el usuario. Revisa la consola.");
         }
     };
-
 
     const obtenerUsuarios = async () => {
         try {
@@ -68,7 +65,6 @@ const Usuarios = () => {
             setUsuarios(datos);
             setUsuariosFiltrados(datos);
             setCargando(false);
-
         } catch (error) {
             console.error(error.message);
             setCargando(false);
@@ -79,7 +75,7 @@ const Usuarios = () => {
         const texto = e.target.value.toLowerCase();
         setTextoBusqueda(texto);
         const filtrados = usuarios.filter(u =>
-            `${u.usuario} ${u.contraseña}`.toLowerCase().includes(texto) 
+            `${u.usuario} ${u.contraseña}`.toLowerCase().includes(texto)
         );
         setUsuariosFiltrados(filtrados);
     };
@@ -133,20 +129,30 @@ const Usuarios = () => {
     return (
         <Container className="mt-4">
             <h4>Usuarios</h4>
-            <Row>
+            <Row className="mb-3 align-items-center">
                 <Col lg={5} md={6} sm={8} xs={12}>
                     <CuadroBusquedas
                         textoBusqueda={textoBusqueda}
                         manejarCambioBusqueda={manejarCambioBusqueda}
                     />
                 </Col>
-                <Col className="text-end">
+                <Col className="text-end d-flex justify-content-end gap-2 flex-wrap">
+                    {/* Botón morado Nuevo Usuario */}
                     <Button
-                        className='color-boton-registro'
+                        size="sm"
                         onClick={() => setMostrarModal(true)}
+                        style={{ backgroundColor: "#800080", borderColor: "#800080" }}
                     >
                         + Nuevo Usuario
                     </Button>
+
+                    {/* Botones opcionales PDF / Excel */}
+                    {/* <Button size="sm" style={{ backgroundColor: "#800080", borderColor: "#800080" }}>
+                        <FaFilePdf className="me-1" /> PDF
+                    </Button>
+                    <Button size="sm" style={{ backgroundColor: "#800080", borderColor: "#800080" }}>
+                        <FaFileExcel className="me-1" /> Excel
+                    </Button> */}
                 </Col>
             </Row>
 

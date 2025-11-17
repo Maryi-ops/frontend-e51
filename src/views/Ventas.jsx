@@ -8,6 +8,12 @@ import ModalEdicionVenta from '../components/ventas/ModalEdicionVenta';
 import ModalEliminacionVenta from '../components/ventas/ModalEliminacionVenta';
 import ModalDetallesVenta from '../components/detalles_ventas/ModalDetallesVenta';
 
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+
+const colorMorado = '#6f42c1';
+
 const Ventas = () => {
     const [ventas, setVentas] = useState([]);
     const [ventasFiltradas, setVentasFiltradas] = useState([]);
@@ -39,9 +45,8 @@ const Ventas = () => {
         total_venta: 0
     });
 
-    // === ESTADO PARA EDICIÓN (SEPARADO) ===
+    // === ESTADO PARA EDICIÓN ===
     const [ventaEnEdicion, setVentaEnEdicion] = useState(null);
-
     const [detallesNuevos, setDetallesNuevos] = useState([]);
 
     const ventasPaginadas = ventasFiltradas.slice(
@@ -89,7 +94,7 @@ const Ventas = () => {
         }
     };
 
-    // === CARGAR VENTAS CON NOMBRES ===
+    // === CARGAR VENTAS ===
     const obtenerVentas = async () => {
         try {
             const resp = await fetch('http://localhost:3000/api/ventas');
@@ -114,7 +119,7 @@ const Ventas = () => {
         }
     };
 
-    // === CARGAR DETALLES CON NOMBRE DE PRODUCTO ===
+    // === CARGAR DETALLES ===
     const obtenerDetallesVenta = async (id_venta) => {
         try {
             const resp = await fetch('http://localhost:3000/api/detallesventas');
@@ -144,9 +149,7 @@ const Ventas = () => {
             if (!resp.ok) throw new Error('Error al cargar clientes');
             const datos = await resp.json();
             setClientes(datos);
-        } catch (error) {
-            console.error(error);
-        }
+        } catch (error) { console.error(error); }
     };
 
     const obtenerEmpleados = async () => {
@@ -155,9 +158,7 @@ const Ventas = () => {
             if (!resp.ok) throw new Error('Error al cargar empleados');
             const datos = await resp.json();
             setEmpleados(datos);
-        } catch (error) {
-            console.error(error);
-        }
+        } catch (error) { console.error(error); }
     };
 
     const obtenerProductos = async () => {
@@ -166,9 +167,7 @@ const Ventas = () => {
             if (!resp.ok) throw new Error('Error al cargar productos');
             const datos = await resp.json();
             setProductos(datos);
-        } catch (error) {
-            console.error(error);
-        }
+        } catch (error) { console.error(error); }
     };
 
     // === BÚSQUEDA ===
@@ -190,7 +189,6 @@ const Ventas = () => {
             alert("Completa cliente, empleado y al menos un detalle.");
             return;
         }
-
         const total = detallesNuevos.reduce((sum, d) => sum + (d.cantidad * d.precio_unitario), 0);
 
         try {
@@ -199,7 +197,6 @@ const Ventas = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...nuevaVenta, total_venta: total })
             });
-
             if (!ventaResp.ok) throw new Error('Error al crear venta');
             const { id_venta } = await ventaResp.json();
 
@@ -222,7 +219,6 @@ const Ventas = () => {
     // === EDICIÓN ===
     const abrirModalEdicion = async (venta) => {
         setVentaAEditar(venta);
-
         setVentaEnEdicion({
             id_cliente: venta.id_cliente,
             id_empleado: venta.id_empleado,
@@ -293,7 +289,7 @@ const Ventas = () => {
         }
     };
 
-    // === LIMPIEZA DE MODALES ===
+    // === LIMPIEZA MODALES ===
     const cerrarModalRegistro = () => {
         setMostrarModalRegistro(false);
         setNuevaVenta({ id_cliente: '', id_empleado: '', fecha_venta: hoy, total_venta: 0 });
@@ -303,8 +299,37 @@ const Ventas = () => {
     const cerrarModalEdicion = () => {
         setMostrarModalEdicion(false);
         setVentaAEditar(null);
-        setVentaEnEdicion(null);  // Limpia estado de edición
+        setVentaEnEdicion(null);
         setDetallesNuevos([]);
+    };
+
+    // === EXPORTAR PDF ===
+    const exportarPDF = () => {
+        const doc = new jsPDF();
+        const columnas = ["ID Venta", "Cliente", "Empleado", "Fecha", "Total"];
+        const filas = ventasFiltradas.map(v => [
+            v.id_venta,
+            v.nombre_cliente,
+            v.nombre_empleado,
+            v.fecha_venta.split('T')[0],
+            v.total_venta.toFixed(2)
+        ]);
+        doc.autoTable({ head: [columnas], body: filas });
+        doc.save('ventas.pdf');
+    };
+
+    // === EXPORTAR EXCEL ===
+    const exportarExcel = () => {
+        const ws = XLSX.utils.json_to_sheet(ventasFiltradas.map(v => ({
+            "ID Venta": v.id_venta,
+            "Cliente": v.nombre_cliente,
+            "Empleado": v.nombre_empleado,
+            "Fecha": v.fecha_venta.split('T')[0],
+            "Total": v.total_venta
+        })));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Ventas");
+        XLSX.writeFile(wb, "ventas.xlsx");
     };
 
     useEffect(() => {
@@ -317,7 +342,7 @@ const Ventas = () => {
     return (
         <Container className="mt-4">
             <h4>Ventas</h4>
-            <Row>
+            <Row className="mb-3 align-items-center">
                 <Col lg={5} md={6} sm={8} xs={12}>
                     <CuadroBusquedas
                         textoBusqueda={textoBusqueda}
@@ -325,8 +350,25 @@ const Ventas = () => {
                     />
                 </Col>
                 <Col className="text-end">
-                    <Button className="color-boton-registro" onClick={() => setMostrarModalRegistro(true)}>
+                    <Button
+                        style={{ backgroundColor: colorMorado, borderColor: colorMorado }}
+                        className="me-2"
+                        onClick={() => setMostrarModalRegistro(true)}
+                    >
                         + Nueva Venta
+                    </Button>
+                    <Button
+                        style={{ backgroundColor: colorMorado, borderColor: colorMorado }}
+                        className="me-2"
+                        onClick={exportarPDF}
+                    >
+                        Exportar PDF
+                    </Button>
+                    <Button
+                        style={{ backgroundColor: colorMorado, borderColor: colorMorado }}
+                        onClick={exportarExcel}
+                    >
+                        Exportar Excel
                     </Button>
                 </Col>
             </Row>

@@ -2,10 +2,19 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import TablaEmpleados from '../components/empleados/TablaEmpleados';
-import CuadroBusquedas from '../components/Busquedas/CuadroBusquedas';
+import CuadroBusquedas from '../components/busquedas/CuadroBusquedas';
 import ModalRegistroEmpleado from '../components/empleados/ModalRegistroEmpleado';
 import ModalEdicionEmpleado from '../components/empleados/ModalEdicionEmpleado';
 import ModalEliminacionEmpleado from '../components/empleados/ModalEliminacionEmpleado';
+
+// PDF y Excel
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
+// Íconos
+import { FaFilePdf, FaFileExcel } from "react-icons/fa";
 
 const Empleados = () => {
     const [empleados, setEmpleados] = useState([]);
@@ -19,8 +28,6 @@ const Empleados = () => {
     const [empleadoAEliminar, setEmpleadoAEliminar] = useState(null);
     const [paginaActual, establecerPaginaActual] = useState(1);
     const elementosPorPagina = 5;
-
-    // Fecha actual en formato YYYY-MM-DD (para input type="date")
     const hoy = new Date().toISOString().split('T')[0];
 
     const [nuevoEmpleado, setNuevoEmpleado] = useState({
@@ -95,7 +102,7 @@ const Empleados = () => {
     };
 
     const abrirModalEdicion = (empleado) => {
-        setEmpleadoEditado({ ...empleado }); // ← Carga fecha tal como está en BD
+        setEmpleadoEditado({ ...empleado });
         setMostrarModalEdicion(true);
     };
 
@@ -136,66 +143,118 @@ const Empleados = () => {
         }
     };
 
+    // PDF morado
+    const generarPDFEmpleados = () => {
+        const doc = new jsPDF();
+        doc.setFontSize(18);
+        doc.setTextColor(128, 0, 128);
+        doc.text("Lista de Empleados", doc.internal.pageSize.getWidth()/2, 20, { align: "center" });
+
+        const columnas = ["ID", "Nombre Completo", "Cargo", "Celular", "Fecha Contratación"];
+        const filas = empleadosFiltrados.map(emp => [
+            emp.id_empleado,
+            `${emp.primer_nombre} ${emp.segundo_nombre} ${emp.primer_apellido} ${emp.segundo_apellido}`,
+            emp.cargo,
+            emp.celular,
+            emp.fecha_contratacion
+        ]);
+
+        autoTable(doc, {
+            head: [columnas],
+            body: filas,
+            startY: 30,
+            headStyles: { fillColor: [128,0,128], textColor: 255 },
+            styles: { textColor: [128,0,128] }
+        });
+
+        doc.save(`Empleados_${new Date().toLocaleDateString()}.pdf`);
+    };
+
+    // Excel morado
+    const exportarExcelEmpleados = () => {
+        const datos = empleadosFiltrados.map(emp => ({
+            ID: emp.id_empleado,
+            "Nombre Completo": `${emp.primer_nombre} ${emp.segundo_nombre} ${emp.primer_apellido} ${emp.segundo_apellido}`,
+            Cargo: emp.cargo,
+            Celular: emp.celular,
+            "Fecha Contratación": emp.fecha_contratacion
+        }));
+        const ws = XLSX.utils.json_to_sheet(datos);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Empleados");
+        XLSX.writeFile(wb, `Empleados_${new Date().toLocaleDateString()}.xlsx`);
+    };
+
     useEffect(() => {
         obtenerEmpleados();
     }, []);
 
     return (
-        <>
-            <Container className="mt-4">
-                <h4>Empleados</h4>
-                <Row>
-                    <Col lg={5} md={6} sm={8} xs={12}>
-                        <CuadroBusquedas
-                            textoBusqueda={textoBusqueda}
-                            manejarCambioBusqueda={manejarCambioBusqueda}
-                        />
-                    </Col>
-                    <Col className="text-end">
-                        <Button
-                            className='color-boton-registro'
-                            onClick={() => setMostrarModal(true)}
-                        >
-                            + Nuevo Empleado
-                        </Button>
-                    </Col>
-                </Row>
+        <Container className="mt-4">
+            <h4>Empleados</h4>
+            <Row className="mb-3 align-items-center">
+                <Col lg={5} md={6} sm={8} xs={12}>
+                    <CuadroBusquedas
+                        textoBusqueda={textoBusqueda}
+                        manejarCambioBusqueda={manejarCambioBusqueda}
+                    />
+                </Col>
+                <Col className="text-end d-flex justify-content-end gap-2 flex-wrap">
+                    <Button
+                        style={{ backgroundColor: "#800080", borderColor: "#800080", borderRadius: "1rem" }}
+                        onClick={generarPDFEmpleados}
+                    >
+                        <FaFilePdf className="me-1" /> PDF
+                    </Button>
+                    <Button
+                        style={{ backgroundColor: "#800080", borderColor: "#800080", borderRadius: "1rem" }}
+                        onClick={exportarExcelEmpleados}
+                    >
+                        <FaFileExcel className="me-1" /> Excel
+                    </Button>
+                    <Button
+                        style={{ backgroundColor: "#800080", borderColor: "#800080", borderRadius: "1rem" }}
+                        onClick={() => setMostrarModal(true)}
+                    >
+                        + Nuevo Empleado
+                    </Button>
+                </Col>
+            </Row>
 
-                <TablaEmpleados
-                    empleados={empleadosPaginados}
-                    cargando={cargando}
-                    abrirModalEdicion={abrirModalEdicion}
-                    abrirModalEliminacion={abrirModalEliminacion}
-                    totalElementos={empleados.length}
-                    elementosPorPagina={elementosPorPagina}
-                    paginaActual={paginaActual}
-                    establecerPaginaActual={establecerPaginaActual}
-                />
+            <TablaEmpleados
+                empleados={empleadosPaginados}
+                cargando={cargando}
+                abrirModalEdicion={abrirModalEdicion}
+                abrirModalEliminacion={abrirModalEliminacion}
+                totalElementos={empleadosFiltrados.length}
+                elementosPorPagina={elementosPorPagina}
+                paginaActual={paginaActual}
+                establecerPaginaActual={establecerPaginaActual}
+            />
 
-                <ModalRegistroEmpleado
-                    mostrarModal={mostrarModal}
-                    setMostrarModal={setMostrarModal}
-                    nuevoEmpleado={nuevoEmpleado}
-                    manejarCambioInput={manejarCambioInput}
-                    agregarEmpleado={agregarEmpleado}
-                />
+            <ModalRegistroEmpleado
+                mostrarModal={mostrarModal}
+                setMostrarModal={setMostrarModal}
+                nuevoEmpleado={nuevoEmpleado}
+                manejarCambioInput={manejarCambioInput}
+                agregarEmpleado={agregarEmpleado}
+            />
 
-                <ModalEdicionEmpleado
-                    mostrar={mostrarModalEdicion}
-                    setMostrar={setMostrarModalEdicion}
-                    empleadoEditado={empleadoEditado}
-                    setEmpleadoEditado={setEmpleadoEditado}
-                    guardarEdicion={guardarEdicion}
-                />
+            <ModalEdicionEmpleado
+                mostrar={mostrarModalEdicion}
+                setMostrar={setMostrarModalEdicion}
+                empleadoEditado={empleadoEditado}
+                setEmpleadoEditado={setEmpleadoEditado}
+                guardarEdicion={guardarEdicion}
+            />
 
-                <ModalEliminacionEmpleado
-                    mostrar={mostrarModalEliminar}
-                    setMostrar={setMostrarModalEliminar}
-                    empleado={empleadoAEliminar}
-                    confirmarEliminacion={confirmarEliminacion}
-                />
-            </Container>
-        </>
+            <ModalEliminacionEmpleado
+                mostrar={mostrarModalEliminar}
+                setMostrar={setMostrarModalEliminar}
+                empleado={empleadoAEliminar}
+                confirmarEliminacion={confirmarEliminacion}
+            />
+        </Container>
     );
 };
 

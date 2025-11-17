@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Table, Spinner, Button } from "react-bootstrap";
 import BotonOrden from "../ordenamiento/BotonOrden";
 import Paginacion from "../ordenamiento/Paginacion";
+import { FaHeart } from "react-icons/fa"; // Corazón morado
 
 const TablaUsuarios = ({
     usuarios,
@@ -43,7 +44,18 @@ const TablaUsuarios = ({
     }
 
     return (
-        <>
+        <div className="position-relative">
+            {/* Corazón morado en la esquina superior derecha */}
+            <FaHeart
+                style={{
+                    position: "absolute",
+                    top: "-10px",
+                    right: "-10px",
+                    color: "#800080",
+                    fontSize: "24px"
+                }}
+            />
+
             <Table striped bordered hover className="mt-3">
                 <thead>
                     <tr>
@@ -53,8 +65,8 @@ const TablaUsuarios = ({
                         <BotonOrden campo="usuario" orden={orden} manejarOrden={manejarOrden}>
                             Usuario
                         </BotonOrden>
-                        <BotonOrden campo="contraseña " orden={orden} manejarOrden={manejarOrden}>
-                            Contraseña 
+                        <BotonOrden campo="contraseña" orden={orden} manejarOrden={manejarOrden}>
+                            Contraseña
                         </BotonOrden>
                         <th>Acciones</th>
                     </tr>
@@ -87,13 +99,15 @@ const TablaUsuarios = ({
                 </tbody>
             </Table>
 
+            {/* Paginación morada */}
             <Paginacion
                 elementosPorPagina={elementosPorPagina}
                 totalElementos={totalElementos}
                 paginaActual={paginaActual}
                 establecerPaginaActual={establecerPaginaActual}
+                colorBoton="#800080" // Pasamos el color morado
             />
-        </>
+        </div>
     );
 };
 

@@ -1,12 +1,19 @@
-// ...existing code...
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import TablaClientes from "../components/clientes/TablaClientes";
-import CuadroBusquedas from "../components/Busquedas/CuadroBusquedas";
+import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import ModalRegistroCliente from "../components/clientes/ModalRegistroCliente.jsx";
 import ModalEdicionCliente from "../components/clientes/ModalEdicionCliente";
 import ModalEliminacionCliente from "../components/clientes/ModalEliminacionCliente";
 
+// Dependencias para PDF y Excel
+import { jsPDF } from "jspdf";
+import autoTable from 'jspdf-autotable';
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
+// Íconos
+import { FaFilePdf, FaFileExcel } from "react-icons/fa";
 
 const Clientes = () => {
     const [clientes, setClientes] = useState([]);
@@ -22,7 +29,7 @@ const Clientes = () => {
     const [clienteAEliminar, setClienteAEliminar] = useState(null);
 
     const [paginaActual, establecerPaginaActual] = useState(1);
-    const elementosPorPagina = 5; // Número de productos por página
+    const elementosPorPagina = 5;
 
     const [mostrarModal, setMostrarModal] = useState(false);
     const [nuevaCliente, setNuevaCliente] = useState({
@@ -35,12 +42,11 @@ const Clientes = () => {
         cedula: ''
     });
 
-    // Calcular productos paginados
+    // Paginación
     const clientesPaginadas = clientesFiltrados.slice(
         (paginaActual - 1) * elementosPorPagina,
         paginaActual * elementosPorPagina
     );
-
 
     const manejarCambioInput = (e) => {
         const { name, value } = e.target;
@@ -89,7 +95,6 @@ const Clientes = () => {
         }
     };
 
-
     const agregarCliente = async () => {
         if (!String(nuevaCliente.primer_nombre ?? "").trim()) return;
 
@@ -102,7 +107,6 @@ const Clientes = () => {
 
             if (!respuesta.ok) throw new Error('Error al guardar');
 
-            // Limpiar y cerrar
             setNuevaCliente({
                 primer_nombre: '',
                 segundo_nombre: '',
@@ -113,7 +117,7 @@ const Clientes = () => {
                 cedula: ''
             });
             setMostrarModal(false);
-            await obtenerClientes(); // Refresca la lista
+            await obtenerClientes();
         } catch (error) {
             console.error("Error al agregar cliente:", error);
             alert("No se pudo guardar el cliente. Revisa la consola.");
@@ -124,12 +128,8 @@ const Clientes = () => {
         setCargando(true);
         try {
             const respuesta = await fetch("http://localhost:3000/api/clientes");
-            if (!respuesta.ok) {
-                throw new Error("Error al obtener los Clientes");
-            }
-
+            if (!respuesta.ok) throw new Error("Error al obtener los Clientes");
             const datos = await respuesta.json();
-
             setClientes(datos || []);
             setClientesFiltrados(datos || []);
         } catch (error) {
@@ -166,82 +166,148 @@ const Clientes = () => {
         setClientesFiltrados(filtradas);
     };
 
+    // PDF en morado
+    const generarPDFClientes = () => {
+        const doc = new jsPDF();
+        doc.setFontSize(18);
+        doc.setTextColor(128, 0, 128); // Morado
+        doc.text("Lista de Clientes", 14, 20);
+
+        const columnas = ["ID", "Nombre Completo", "Cédula", "Celular", "Dirección"];
+        const filas = clientesFiltrados.map(c => [
+            c.id_cliente,
+            `${c.primer_nombre} ${c.segundo_nombre} ${c.primer_apellido} ${c.segundo_apellido}`,
+            c.cedula,
+            c.celular,
+            c.direccion
+        ]);
+
+        autoTable(doc, {
+            head: [columnas],
+            body: filas,
+            startY: 30,
+            headStyles: { fillColor: [128, 0, 128] }, // encabezado morado
+            styles: { textColor: [128, 0, 128] } // texto morado
+        });
+
+        doc.save(`Clientes_${new Date().toLocaleDateString()}.pdf`);
+    };
+
+    // Excel en morado
+    const exportarExcelClientes = () => {
+        const datos = clientesFiltrados.map(c => ({
+            ID: c.id_cliente,
+            "Nombre Completo": `${c.primer_nombre} ${c.segundo_nombre} ${c.primer_apellido} ${c.segundo_apellido}`,
+            Cédula: c.cedula,
+            Celular: c.celular,
+            Dirección: c.direccion
+        }));
+        const ws = XLSX.utils.json_to_sheet(datos);
+
+        // Estilo morado en encabezados
+        const headerColor = "FF00FF"; // morado
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cell_address = { c: C, r: 0 };
+            const cell_ref = XLSX.utils.encode_cell(cell_address);
+            if (!ws[cell_ref]) continue;
+            ws[cell_ref].s = {
+                fill: { fgColor: { rgb: headerColor } },
+                font: { color: { rgb: "FFFFFF" }, bold: true }
+            };
+        }
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Clientes");
+
+        const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+        const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+        saveAs(data, `Clientes_${new Date().toLocaleDateString()}.xlsx`);
+    };
 
     useEffect(() => {
         obtenerClientes();
     }, []);
 
     return (
-        <>
-            <Container className="mt-4">
+        <Container className="mt-4">
+            <h4>Clientes</h4>
 
-                <h4>Clientes</h4>
+            <Row className="mb-3 align-items-center">
+                <Col lg={5} md={8} sm={8} xs={7}>
+                    <CuadroBusquedas
+                        textoBusqueda={textoBusqueda}
+                        manejarCambioBusqueda={manejarCambioBusqueda}
+                    />
+                </Col>
+                <Col className="text-end d-flex justify-content-end gap-2 flex-wrap">
+                    <Button
+                        size="sm"
+                        onClick={generarPDFClientes}
+                        style={{ backgroundColor: "#800080", borderColor: "#800080" }}
+                    >
+                        <FaFilePdf className="me-1" /> PDF
+                    </Button>
+                    <Button
+                        size="sm"
+                        onClick={exportarExcelClientes}
+                        style={{ backgroundColor: "#800080", borderColor: "#800080" }}
+                    >
+                        <FaFileExcel className="me-1" /> Excel
+                    </Button>
+                    <Button
+                        size="sm"
+                        onClick={() => {
+                            setNuevaCliente({
+                                primer_nombre: '',
+                                segundo_nombre: '',
+                                primer_apellido: '',
+                                segundo_apellido: '',
+                                celular: '',
+                                direccion: '',
+                                cedula: ''
+                            });
+                            setMostrarModal(true);
+                        }}
+                        style={{ backgroundColor: "#800080", borderColor: "#800080" }}
+                    >
+                        + Nuevo Cliente
+                    </Button>
+                </Col>
+            </Row>
 
-                <Row>
-                    <Col lg={5} md={8} sm={8} xs={7}>
-                        <CuadroBusquedas
-                            textoBusqueda={textoBusqueda}
-                            manejarCambioBusqueda={manejarCambioBusqueda}
-                        />
-                    </Col>
-                    <Col className="text-end">
-                        <Button
-                            variant="primary"
-                            className="color_boton_registrar"
-                            onClick={() => {
-                                setNuevaCliente({
-                                    primer_nombre: '',
-                                    segundo_nombre: '',
-                                    primer_apellido: '',
-                                    segundo_apellido: '',
-                                    celular: '',
-                                    direccion: '',
-                                    cedula: ''
-                                });
-                                setMostrarModal(true);
-                            }}
-                        >
-                            + Nueva Cliente
-                        </Button>
-                    </Col>
-                </Row>
+            <TablaClientes
+                clientes={clientesPaginadas}
+                cargando={cargando}
+                abrirModalEdicion={abrirModalEdicion}
+                abrirModalEliminacion={abrirModalEliminacion}
+                totalElementos={clientes.length}
+                elementosPorPagina={elementosPorPagina}
+                paginaActual={paginaActual}
+                establecerPaginaActual={establecerPaginaActual}
+            />
 
-
-                <TablaClientes
-                    clientes={clientesPaginadas}
-                    cargando={cargando}
-                    abrirModalEdicion={abrirModalEdicion}
-                    abrirModalEliminacion={abrirModalEliminacion}
-                    totalElementos={clientes.length} // Total de categorias
-                    elementosPorPagina={elementosPorPagina} // Elementos por página
-                    paginaActual={paginaActual} // Página actual
-                    establecerPaginaActual={establecerPaginaActual} // Método para cambiar página
-                />
-
-                <ModalRegistroCliente
-                    mostrarModal={mostrarModal}
-                    setMostrarModal={setMostrarModal}
-                    nuevoCliente={nuevaCliente}
-                    manejarCambioInput={manejarCambioInput}
-                    agregarCliente={agregarCliente}
-                />
-                <ModalEdicionCliente
-                    mostrar={mostrarModalEdicion}
-                    setMostrar={setMostrarModalEdicion}
-                    clienteEditado={clienteEditado}
-                    setClienteEditado={setClienteEditado}
-                    guardarEdicion={guardarEdicion}
-                />
-
-                <ModalEliminacionCliente
-                    mostrar={mostrarModalEliminar}
-                    setMostrar={setMostrarModalEliminar}
-                    cliente={clienteAEliminar}
-                    confirmarEliminacion={confirmarEliminacion}
-                />
-
-            </Container>
-        </>
+            <ModalRegistroCliente
+                mostrarModal={mostrarModal}
+                setMostrarModal={setMostrarModal}
+                nuevoCliente={nuevaCliente}
+                manejarCambioInput={manejarCambioInput}
+                agregarCliente={agregarCliente}
+            />
+            <ModalEdicionCliente
+                mostrar={mostrarModalEdicion}
+                setMostrar={setMostrarModalEdicion}
+                clienteEditado={clienteEditado}
+                setClienteEditado={setClienteEditado}
+                guardarEdicion={guardarEdicion}
+            />
+            <ModalEliminacionCliente
+                mostrar={mostrarModalEliminar}
+                setMostrar={setMostrarModalEliminar}
+                cliente={clienteAEliminar}
+                confirmarEliminacion={confirmarEliminacion}
+            />
+        </Container>
     );
 }
 

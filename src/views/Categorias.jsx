@@ -1,86 +1,43 @@
+// src/views/Categorias.jsx
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import TablaCategorias from "../components/categorias/TablaCategorias";
-import CuadroBusquedas from "../components/Busquedas/CuadroBusquedas";
+import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import ModalRegistroCategoria from "../components/categorias/ModalRegistroCategorias";
 import ModalEdicionCategoria from '../components/categorias/ModalEdicionCategoria';
 import ModalEliminacionCategoria from '../components/categorias/ModalEliminacionCategoria';
 
+// Dependencias para PDF y Excel
+import { jsPDF } from "jspdf";
+import autoTable from 'jspdf-autotable';
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
+// Íconos
+import { FaFilePdf, FaFileExcel } from "react-icons/fa";
+
 const Categorias = () => {
   const [categorias, setCategorias] = useState([]);
   const [cargando, setCargando] = useState(true);
-
   const [categoriasFiltradas, setCategoriasFiltradas] = useState([]);
   const [textoBusqueda, setTextoBusqueda] = useState("");
-
+  const [mostrarModal, setMostrarModal] = useState(false);
   const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
   const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false);
-
   const [categoriaEditada, setCategoriaEditada] = useState(null);
   const [categoriaAEliminar, setCategoriaAEliminar] = useState(null);
-
   const [paginaActual, establecerPaginaActual] = useState(1);
-  const elementosPorPagina = 5; // Número de productos por página
+  const elementosPorPagina = 5;
 
-
-  const [mostrarModal, setMostrarModal] = useState(false);
   const [nuevaCategoria, setNuevaCategoria] = useState({
     nombre_categoria: "",
     descripcion_categoria: "",
   });
 
-  // Calcular productos paginados
   const categoriasPaginadas = categoriasFiltradas.slice(
     (paginaActual - 1) * elementosPorPagina,
     paginaActual * elementosPorPagina
   );
-
-
-
-  const abrirModalEdicion = (categoria) => {
-    setCategoriaEditada({ ...categoria });
-    setMostrarModalEdicion(true);
-  };
-
-  const guardarEdicion = async () => {
-    if (!categoriaEditada.nombre_categoria.trim()) return;
-    try {
-      const respuesta = await fetch(`http://localhost:3000/api/actualizarcategoria/${categoriaEditada.id_categoria}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(categoriaEditada)
-      });
-      if (!respuesta.ok) throw new Error('Error al actualizar');
-      setMostrarModalEdicion(false);
-      await obtenerCategorias();
-    } catch (error) {
-      console.error("Error al editar categoría:", error);
-      alert("No se pudo actualizar la categoría.");
-    }
-  };
-
-
-  const abrirModalEliminacion = (categoria) => {
-    setCategoriaAEliminar(categoria);
-    setMostrarModalEliminar(true);
-  };
-
-  const confirmarEliminacion = async () => {
-    try {
-      const respuesta = await fetch(`http://localhost:3000/api/eliminarcategoria/${categoriaAEliminar.id_categoria}`, {
-        method: 'DELETE',
-      });
-      if (!respuesta.ok) throw new Error('Error al eliminar');
-      setMostrarModalEliminar(false);
-      setCategoriaAEliminar(null);
-      await obtenerCategorias();
-    } catch (error) {
-      console.error("Error al eliminar categoría:", error);
-      alert("No se pudo eliminar la categoría.");
-    }
-  };
-
-
 
   const manejarCambioInput = (e) => {
     const { name, value } = e.target;
@@ -99,13 +56,12 @@ const Categorias = () => {
 
       if (!respuesta.ok) throw new Error("Error al guardar");
 
-      // Limpiar y cerrar
       setNuevaCategoria({ nombre_categoria: "", descripcion_categoria: "" });
       setMostrarModal(false);
-      await obtenerCategorias(); // Refresca la lista
+      await obtenerCategorias();
     } catch (error) {
       console.error("Error al agregar categoría:", error);
-      alert("No se pudo guardar la categoría. Revisa la consola.");
+      alert("No se pudo guardar la categoría.");
     }
   };
 
@@ -113,12 +69,8 @@ const Categorias = () => {
     setCargando(true);
     try {
       const respuesta = await fetch("http://localhost:3000/api/categorias");
-      if (!respuesta.ok) {
-        throw new Error("Error al obtener las categorias");
-      }
-
+      if (!respuesta.ok) throw new Error("Error al obtener las categorias");
       const datos = await respuesta.json();
-
       setCategorias(datos || []);
       setCategoriasFiltradas(datos || []);
     } catch (error) {
@@ -141,70 +93,176 @@ const Categorias = () => {
     setCategoriasFiltradas(filtradas);
   };
 
+  const abrirModalEdicion = (categoria) => {
+    setCategoriaEditada({ ...categoria });
+    setMostrarModalEdicion(true);
+  };
+
+  const guardarEdicion = async () => {
+    if (!categoriaEditada.nombre_categoria.trim()) return;
+    try {
+      const respuesta = await fetch(
+        `http://localhost:3000/api/actualizarcategoria/${categoriaEditada.id_categoria}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(categoriaEditada)
+        }
+      );
+      if (!respuesta.ok) throw new Error('Error al actualizar');
+      setMostrarModalEdicion(false);
+      await obtenerCategorias();
+    } catch (error) {
+      console.error("Error al editar categoría:", error);
+      alert("No se pudo actualizar la categoría.");
+    }
+  };
+
+  const abrirModalEliminacion = (categoria) => {
+    setCategoriaAEliminar(categoria);
+    setMostrarModalEliminar(true);
+  };
+
+  const confirmarEliminacion = async () => {
+    try {
+      const respuesta = await fetch(
+        `http://localhost:3000/api/eliminarcategoria/${categoriaAEliminar.id_categoria}`,
+        { method: 'DELETE' }
+      );
+      if (!respuesta.ok) throw new Error('Error al eliminar');
+      setMostrarModalEliminar(false);
+      setCategoriaAEliminar(null);
+      await obtenerCategorias();
+    } catch (error) {
+      console.error("Error al eliminar categoría:", error);
+      alert("No se pudo eliminar la categoría.");
+    }
+  };
+
+  // PDF morado
+  const generarPDFCategorias = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.setTextColor(128,0,128); // morado
+    doc.text("Lista de Categorías", doc.internal.pageSize.getWidth()/2, 20, { align: "center" });
+
+    const columnas = ["ID", "Nombre", "Descripción"];
+    const filas = categoriasFiltradas.map((c) => [
+      c.id_categoria,
+      c.nombre_categoria,
+      c.descripcion_categoria
+    ]);
+
+    autoTable(doc, {
+      head: [columnas],
+      body: filas,
+      startY: 30,
+      headStyles: { fillColor: [128,0,128], textColor: 255 },
+      styles: { textColor: [128,0,128] }
+    });
+
+    doc.save(`Categorias_${new Date().toLocaleDateString()}.pdf`);
+  };
+
+  // Excel morado
+  const exportarExcelCategorias = () => {
+    const datos = categoriasFiltradas.map((c) => ({
+      ID: c.id_categoria,
+      Nombre: c.nombre_categoria,
+      Descripción: c.descripcion_categoria
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(datos);
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    const headerColor = "800080"; // morado
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      const cell_address = { c: C, r: 0 };
+      const cell_ref = XLSX.utils.encode_cell(cell_address);
+      if (!ws[cell_ref]) continue;
+      ws[cell_ref].s = {
+        fill: { fgColor: { rgb: headerColor } },
+        font: { color: { rgb: "FFFFFF" }, bold: true }
+      };
+    }
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Categorias");
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(data, `Categorias_${new Date().toLocaleDateString()}.xlsx`);
+  };
+
   useEffect(() => {
     obtenerCategorias();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <>
-      <Container className="mt-4">
-        <h4>Categorías</h4>
+    <Container className="mt-4">
+      <h4>Categorías</h4>
 
-        <Row>
-          <Col lg={5} md={8} sm={8} xs={7}>
-            <CuadroBusquedas textoBusqueda={textoBusqueda} manejarCambioBusqueda={manejarCambioBusqueda} />
-          </Col>
-          <Col className="text-end">
-            <Button
-              variant="primary"
-              className="color_boton_registrar"
-              onClick={() => {
-                setNuevaCategoria({ nombre_categoria: "", descripcion_categoria: "" });
-                setMostrarModal(true);
-              }}
-            >
-              + Nueva Categoría
-            </Button>
-          </Col>
+      <Row className="mb-3 align-items-center">
+        <Col lg={5} md={8} sm={8} xs={7}>
+          <CuadroBusquedas textoBusqueda={textoBusqueda} manejarCambioBusqueda={manejarCambioBusqueda} />
+        </Col>
+        <Col className="text-end d-flex justify-content-end gap-2 flex-wrap">
+          <Button
+            style={{ backgroundColor: "#800080", borderColor: "#800080", borderRadius: "1rem" }}
+            size="sm"
+            onClick={generarPDFCategorias}
+          >
+            <FaFilePdf className="me-1" /> PDF
+          </Button>
+          <Button
+            style={{ backgroundColor: "#800080", borderColor: "#800080", borderRadius: "1rem" }}
+            size="sm"
+            onClick={exportarExcelCategorias}
+          >
+            <FaFileExcel className="me-1" /> Excel
+          </Button>
+          <Button
+            style={{ backgroundColor: "#800080", borderColor: "#800080", borderRadius: "1rem" }}
+            onClick={() => {
+              setNuevaCategoria({ nombre_categoria: "", descripcion_categoria: "" });
+              setMostrarModal(true);
+            }}
+          >
+            + Nueva Categoría
+          </Button>
+        </Col>
+      </Row>
 
+      <TablaCategorias
+        categorias={categoriasPaginadas}
+        cargando={cargando}
+        abrirModalEdicion={abrirModalEdicion}
+        abrirModalEliminacion={abrirModalEliminacion}
+        totalElementos={categorias.length}
+        elementosPorPagina={elementosPorPagina}
+        paginaActual={paginaActual}
+        establecerPaginaActual={establecerPaginaActual}
+      />
 
-        </Row>
-
-        <TablaCategorias
-          categorias={categoriasPaginadas}
-          cargando={cargando}
-          abrirModalEdicion={abrirModalEdicion}
-          abrirModalEliminacion={abrirModalEliminacion}
-          totalElementos={categorias.length} // Total de categorias
-          elementosPorPagina={elementosPorPagina} // Elementos por página
-          paginaActual={paginaActual} // Página actual
-          establecerPaginaActual={establecerPaginaActual} // Método para cambiar página
-        />
-        <ModalRegistroCategoria
-          mostrarModal={mostrarModal}
-          setMostrarModal={setMostrarModal}
-          nuevaCategoria={nuevaCategoria}
-          manejarCambioInput={manejarCambioInput}
-          agregarCategoria={agregarCategoria}
-        />
-        <ModalEdicionCategoria
-          mostrar={mostrarModalEdicion}
-          setMostrar={setMostrarModalEdicion}
-          categoriaEditada={categoriaEditada}
-          setCategoriaEditada={setCategoriaEditada}
-          guardarEdicion={guardarEdicion}
-        />
-
-        <ModalEliminacionCategoria
-          mostrar={mostrarModalEliminar}
-          setMostrar={setMostrarModalEliminar}
-          categoria={categoriaAEliminar}
-          confirmarEliminacion={confirmarEliminacion}
-        />
-
-      </Container>
-    </>
+      <ModalRegistroCategoria
+        mostrarModal={mostrarModal}
+        setMostrarModal={setMostrarModal}
+        nuevaCategoria={nuevaCategoria}
+        manejarCambioInput={manejarCambioInput}
+        agregarCategoria={agregarCategoria}
+      />
+      <ModalEdicionCategoria
+        mostrar={mostrarModalEdicion}
+        setMostrar={setMostrarModalEdicion}
+        categoriaEditada={categoriaEditada}
+        setCategoriaEditada={setCategoriaEditada}
+        guardarEdicion={guardarEdicion}
+      />
+      <ModalEliminacionCategoria
+        mostrar={mostrarModalEliminar}
+        setMostrar={setMostrarModalEliminar}
+        categoria={categoriaAEliminar}
+        confirmarEliminacion={confirmarEliminacion}
+      />
+    </Container>
   );
 };
 
