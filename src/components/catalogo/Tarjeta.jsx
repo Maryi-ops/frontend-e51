@@ -8,7 +8,7 @@ const Tarjeta = ({ indice, nombre_producto, descripcion_producto, precio_unitari
                 <Card.Img
                     variant="top"
                     src={`data:image/png;base64,${imagen}`}
-        />
+                />
                 <Card.Body>
                     <Card.Title>
                         <strong>{nombre_producto}</strong>

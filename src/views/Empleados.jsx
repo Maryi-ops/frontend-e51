@@ -6,6 +6,7 @@ import CuadroBusquedas from '../components/busquedas/CuadroBusquedas';
 import ModalRegistroEmpleado from '../components/empleados/ModalRegistroEmpleado';
 import ModalEdicionEmpleado from '../components/empleados/ModalEdicionEmpleado';
 import ModalEliminacionEmpleado from '../components/empleados/ModalEliminacionEmpleado';
+import { Zoom } from "react-awesome-reveal";
 
 // PDF y Excel
 import { jsPDF } from 'jspdf';
@@ -220,7 +221,7 @@ const Empleados = () => {
                     </Button>
                 </Col>
             </Row>
-
+            
             <TablaEmpleados
                 empleados={empleadosPaginados}
                 cargando={cargando}
